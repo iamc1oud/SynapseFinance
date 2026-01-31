@@ -9,13 +9,13 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen
 
-# Copy application code
+# Copy application code (will be overridden by volume mount in dev)
 COPY synapse/ ./synapse/
 
 # Expose port
 EXPOSE 8000
 
-# Run the application
+# Run with hot reload enabled
 CMD ["uv", "run", "python", "synapse/manage.py", "runserver", "0.0.0.0:8000"]
