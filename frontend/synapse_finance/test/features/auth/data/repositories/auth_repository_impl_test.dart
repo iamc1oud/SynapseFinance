@@ -48,7 +48,7 @@ void main() {
     const testEmail = 'test@example.com';
     const testPassword = 'password123';
     const testUser = UserModel(
-      id: '1',
+      id: 1,
       email: testEmail,
       firstName: 'Test',
       lastName: 'User',
@@ -56,6 +56,7 @@ void main() {
     const testTokens = AuthTokensModel(
       accessToken: 'access_token',
       refreshToken: 'refresh_token',
+      tokenType: 'Bearer',
     );
     const testResponse = LoginResponse(user: testUser, tokens: testTokens);
 
@@ -197,7 +198,7 @@ void main() {
 
   group('getCurrentUser', () {
     const testUser = UserModel(
-      id: '1',
+      id: 1,
       email: 'test@example.com',
       firstName: 'Test',
       lastName: 'User',

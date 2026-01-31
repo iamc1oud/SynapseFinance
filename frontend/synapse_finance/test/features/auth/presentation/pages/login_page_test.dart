@@ -126,7 +126,7 @@ void main() {
 
     testWidgets('shows loading indicator when logging in', (tester) async {
       when(() => mockLoginUseCase(any())).thenAnswer(
-        (_) async => const Right(User(id: '1', email: 'test@example.com')),
+        (_) async => const Right(User(id: 1, email: 'test@example.com')),
       );
 
       await tester.pumpWidget(createTestWidget());

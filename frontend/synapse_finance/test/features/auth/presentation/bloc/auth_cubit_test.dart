@@ -54,7 +54,7 @@ void main() {
   });
 
   const testUser = User(
-    id: '1',
+    id: 1,
     email: 'test@example.com',
     firstName: 'Test',
     lastName: 'User',
