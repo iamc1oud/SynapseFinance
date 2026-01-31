@@ -22,7 +22,7 @@ from ..schemas import (
     UserResponse,
 )
 
-router = Router()
+router = Router(tags=["Authentication"])
 
 @router.post("/register", response={201: AuthResponse, 400: ErrorResponse})
 def register(request, payload: RegisterRequest):

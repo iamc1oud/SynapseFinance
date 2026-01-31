@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
 
           return MaterialApp.router(
             title: 'AI Expense Manager',
+
             debugShowCheckedModeBanner: false,
             theme: AppTheme.darkTheme,
             routerConfig: appRouter.router,

@@ -53,13 +53,7 @@ class _LoginViewState extends State<_LoginView> {
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.chevron_left),
-              onPressed: () => Navigator.of(context).maybePop(),
-            ),
-            title: const Text('AI Expense Manager'),
-          ),
+          appBar: AppBar(title: const Text('AI Expense Manager')),
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
