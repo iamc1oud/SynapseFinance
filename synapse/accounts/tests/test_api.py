@@ -1,7 +1,7 @@
 import pytest
 from django.test import Client
 
-from accounts.models import RefreshToken, User
+from accounts.models import RefreshToken, User, AppPreference
 
 
 @pytest.fixture
@@ -89,6 +89,22 @@ class TestRegisterEndpoint:
 
         assert response.status_code == 422
 
+    def test_register_app_preference_exist(self, client, db):
+        """
+        Test registration with existing app preference should exist.
+        """
+        response = client.post(
+            "/api/auth/register",
+            data={
+                "email": "existing@example.com",
+                "password": "SecurePass123!",
+            },
+            content_type="application/json",
+        )
+        # Get app preference
+        user_obj = User.objects.get(email="existing@example.com")
+        app_preference = AppPreference.objects.get(user=user_obj)
+        assert app_preference is not None
 
 class TestLoginEndpoint:
     """Tests for the /auth/login endpoint."""

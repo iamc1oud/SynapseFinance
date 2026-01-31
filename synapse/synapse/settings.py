@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
+from psycopg.sql import DEFAULT
 
 import os
 from pathlib import Path
@@ -115,6 +116,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+
+LANGUAGES = [
+    ('en-us', 'English (US)'),
+    ('en-gb', 'English (UK)'),
+    ('es', 'Spanish'),
+    ('fr', 'French'),
+    ('de', 'German'),
+]
+
+DEFAULT_CURRENCY = 'USD'
 
 TIME_ZONE = 'UTC'
 

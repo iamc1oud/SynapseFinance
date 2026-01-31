@@ -1,7 +1,9 @@
 import pytest
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
-from accounts.models import RefreshToken, User
+from accounts.models import RefreshToken, User, AppPreference
+from django.conf import settings
 
 
 class TestUserManager:
@@ -133,3 +135,26 @@ class TestRefreshTokenModel:
         user.delete()
 
         assert RefreshToken.objects.filter(user_id=user_id).count() == 0
+
+class TestAppPreferenceModel:
+    """Tests for the AppPreference model."""
+
+    def test_app_preference_str(self, user):
+        """Test app preference string representation."""
+        preferences = AppPreference.objects.get(user=user)
+        assert str(preferences) == f"Preferences for {user.email}"
+
+    def test_app_preference_defaults(self, user):
+        """Test app preference default values."""
+        preferences = AppPreference.objects.get(user=user)
+        assert preferences.language == settings.LANGUAGE_CODE
+        assert preferences.currency == settings.DEFAULT_CURRENCY
+        assert preferences.timezone == settings.TIME_ZONE
+
+    def test_app_preference_timezone_validation(self, user):
+        """Test app preference timezone validation."""
+        preferences = AppPreference.objects.get(user=user)
+        preferences.timezone = "invalid_timezone"
+
+        with pytest.raises(ValidationError):
+            preferences.full_clean()

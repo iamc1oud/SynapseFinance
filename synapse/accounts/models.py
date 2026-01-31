@@ -1,7 +1,16 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
+from synapse.constants import CURRENCIES
+import pytz
 
+
+def validate_timezone(value):
+    """Validate that the value is a valid timezone."""
+    if value not in pytz.all_timezones:
+        raise ValidationError(f"'{value}' is not a valid timezone.")
 
 class UserManager(BaseUserManager):
     """Custom user manager where email is the unique identifier."""
@@ -81,3 +90,35 @@ class RefreshToken(models.Model):
     @property
     def is_valid(self):
         return not self.revoked and not self.is_expired
+
+
+
+class SubCurrency(models.Model):
+    """
+    Customer can add multiple sub-currencies to their account.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sub_currencies_preference")
+    currency = models.CharField(max_length=3, choices=CURRENCIES, default=settings.DEFAULT_CURRENCY)
+
+    class Meta:
+        db_table = "sub_currencies"
+
+    def __str__(self):
+        return "SubCurrency for {}".format(self.user.email)
+
+
+class AppPreference(models.Model):
+    """
+    Customer preferences for their account.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="preferences")
+    language = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)
+    currency = models.CharField(max_length=3, choices=CURRENCIES, default=settings.DEFAULT_CURRENCY, help_text="The default currency for the user.")
+    sub_currencies = models.ManyToManyField(SubCurrency, related_name="user_preferences")
+    timezone = models.CharField(max_length=32, default=settings.TIME_ZONE, validators=[validate_timezone], help_text="The default timezone for the user.")
+
+    class Meta:
+        db_table = "app_preferences"
+
+    def __str__(self):
+        return "Preferences for {}".format(self.user.email)

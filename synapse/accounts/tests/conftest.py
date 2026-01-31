@@ -1,5 +1,5 @@
 import pytest
-from accounts.models import User
+from accounts.models import User, AppPreference
 
 
 @pytest.fixture
@@ -16,7 +16,9 @@ def user_data():
 @pytest.fixture
 def user(db, user_data):
     """Create and return a test user."""
-    return User.objects.create_user(**user_data)
+    user_obj =  User.objects.create_user(**user_data)
+    app_preference = AppPreference.objects.create(user=user_obj, language='en-us', currency='USD', timezone='UTC')
+    return user_obj
 
 
 @pytest.fixture
