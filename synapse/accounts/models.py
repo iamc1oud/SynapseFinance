@@ -92,6 +92,10 @@ class RefreshToken(models.Model):
         return not self.revoked and not self.is_expired
 
 
+UNIT_POSITIONS = [
+    ('front', 'Front'),
+    ('end', 'End'),
+]
 
 class SubCurrency(models.Model):
     """
@@ -99,6 +103,10 @@ class SubCurrency(models.Model):
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sub_currencies_preference")
     currency = models.CharField(max_length=3, choices=CURRENCIES, default=settings.DEFAULT_CURRENCY)
+    exchange_rate = models.DecimalField(max_digits=10, decimal_places=7, default=1.0)
+    unit_position = models.CharField(max_length=10, choices=UNIT_POSITIONS, default=UNIT_POSITIONS[0][0])
+    decimal_point = models.DecimalField(max_digits=10, decimal_places=7, default=1.0)
+
 
     class Meta:
         db_table = "sub_currencies"
@@ -113,12 +121,12 @@ class AppPreference(models.Model):
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="preferences")
     language = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)
-    currency = models.CharField(max_length=3, choices=CURRENCIES, default=settings.DEFAULT_CURRENCY, help_text="The default currency for the user.")
+    main_currency = models.ForeignKey(SubCurrency, on_delete=models.CASCADE, related_name="user_main_currency_preferences", default=None)
     sub_currencies = models.ManyToManyField(SubCurrency, related_name="user_preferences")
     timezone = models.CharField(max_length=32, default=settings.TIME_ZONE, validators=[validate_timezone], help_text="The default timezone for the user.")
 
     class Meta:
-        db_table = "app_preferences"
+        db_table = "user_preferences"
 
     def __str__(self):
         return "Preferences for {}".format(self.user.email)

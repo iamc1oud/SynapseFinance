@@ -1,5 +1,5 @@
 import pytest
-from accounts.models import User, AppPreference
+from accounts.models import User, AppPreference, SubCurrency
 
 
 @pytest.fixture
@@ -16,8 +16,9 @@ def user_data():
 @pytest.fixture
 def user(db, user_data):
     """Create and return a test user."""
-    user_obj =  User.objects.create_user(**user_data)
-    app_preference = AppPreference.objects.create(user=user_obj, language='en-us', currency='USD', timezone='UTC')
+    user_obj = User.objects.create_user(**user_data)
+    user_main_currency = SubCurrency.objects.create(currency='USD', user=user_obj)
+    AppPreference.objects.create(user=user_obj, language='en-us', main_currency=user_main_currency, timezone='UTC')
     return user_obj
 
 

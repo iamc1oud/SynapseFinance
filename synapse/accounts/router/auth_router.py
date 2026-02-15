@@ -1,6 +1,8 @@
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from accounts.models import SubCurrency
 from ninja import Router
+from django.conf import settings
 
 from ..auth import (
     AuthenticationError,
@@ -46,7 +48,10 @@ def register(request, payload: RegisterRequest):
     )
 
     # Create user default app preference
-    AppPreference.objects.create(user=user)
+    # Create a default curreny
+    user_main_currency = SubCurrency.objects.create(currency=settings.DEFAULT_CURRENCY, user=user)
+
+    AppPreference.objects.create(user=user, main_currency=user_main_currency)
 
     # Generate tokens
     access_token, refresh_token = create_tokens(user)

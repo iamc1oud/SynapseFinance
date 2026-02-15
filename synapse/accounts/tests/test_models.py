@@ -148,7 +148,7 @@ class TestAppPreferenceModel:
         """Test app preference default values."""
         preferences = AppPreference.objects.get(user=user)
         assert preferences.language == settings.LANGUAGE_CODE
-        assert preferences.currency == settings.DEFAULT_CURRENCY
+        assert preferences.main_currency.currency == settings.DEFAULT_CURRENCY
         assert preferences.timezone == settings.TIME_ZONE
 
     def test_app_preference_timezone_validation(self, user):
