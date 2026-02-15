@@ -1,6 +1,8 @@
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from accounts.models import SubCurrency
+from accounts.middleware import rls_context
 from ninja import Router
 from django.conf import settings
 
@@ -11,6 +13,7 @@ from ..auth import (
     refresh_tokens,
     revoke_all_user_tokens,
     revoke_refresh_token,
+    verify_refresh_token,
 )
 from ..models import User, AppPreference
 from ..schemas import (
@@ -47,14 +50,12 @@ def register(request, payload: RegisterRequest):
         last_name=payload.last_name,
     )
 
-    # Create user default app preference
-    # Create a default curreny
-    user_main_currency = SubCurrency.objects.create(currency=settings.DEFAULT_CURRENCY, user=user)
-
-    AppPreference.objects.create(user=user, main_currency=user_main_currency)
-
-    # Generate tokens
-    access_token, refresh_token = create_tokens(user)
+    # Set RLS context for the newly created user so inserts into
+    # RLS-protected tables (sub_currencies, user_preferences, refresh_tokens) succeed.
+    with transaction.atomic(), rls_context(user.pk):
+        user_main_currency = SubCurrency.objects.create(currency=settings.DEFAULT_CURRENCY, user=user)
+        AppPreference.objects.create(user=user, main_currency=user_main_currency)
+        access_token, refresh_token = create_tokens(user)
 
     return 201, AuthResponse(
         user=UserResponse.from_user(user),
@@ -76,8 +77,8 @@ def login(request, payload: LoginRequest):
     if not user.is_active:
         return 401, ErrorResponse(detail="Account is disabled")
 
-    # Generate tokens
-    access_token, refresh_token = create_tokens(user)
+    with transaction.atomic(), rls_context(user.pk):
+        access_token, refresh_token = create_tokens(user)
 
     return 200, AuthResponse(
         user=UserResponse.from_user(user),
@@ -89,7 +90,12 @@ def login(request, payload: LoginRequest):
 def refresh(request, payload: RefreshTokenRequest):
     """Get new access and refresh tokens using a valid refresh token."""
     try:
-        access_token, new_refresh_token = refresh_tokens(payload.refresh_token)
+        # Verify first to get the user for RLS context, then do the
+        # revoke + create inside the RLS-scoped transaction.
+        user = verify_refresh_token(payload.refresh_token)
+        with transaction.atomic(), rls_context(user.pk):
+            revoke_refresh_token(payload.refresh_token)
+            access_token, new_refresh_token = create_tokens(user)
         return 200, TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
     except AuthenticationError as e:
         return 401, ErrorResponse(detail=str(e))

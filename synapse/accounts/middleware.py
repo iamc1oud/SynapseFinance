@@ -1,7 +1,32 @@
+from contextlib import contextmanager
+
 from django.db import connection, transaction
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def rls_context(user_id):
+    """
+    Set the RLS user context for operations outside the middleware
+    (e.g. login, register, background tasks).
+
+    Usage:
+        with rls_context(user.id):
+            RefreshToken.objects.create(user=user, ...)
+    """
+    if connection.vendor != "postgresql":
+        yield
+        return
+
+    with connection.cursor() as cursor:
+        cursor.execute("SET LOCAL app.current_user_id = %s", [str(user_id)])
+    try:
+        yield
+    finally:
+        with connection.cursor() as cursor:
+            cursor.execute("RESET app.current_user_id")
 
 class RLSMiddleware:
     """
@@ -15,8 +40,10 @@ class RLSMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        if connection.vendor != "postgresql":
+            return self.get_response(request)
+
         user_id = self._get_user_id(request)
-        user_id=4
 
         if user_id is not None:
             with transaction.atomic():
@@ -43,8 +70,6 @@ class RLSMiddleware:
         try:
             from accounts.auth import verify_access_token
             user_id = verify_access_token(token)
-
-            print("RLSMiddleware: User ID - %s", user_id)
 
             return user_id
         except Exception:
