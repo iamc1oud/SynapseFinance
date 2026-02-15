@@ -7,6 +7,7 @@ services:
       POSTGRES_PASSWORD: synapse
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - "5433:5432"
     healthcheck:
@@ -25,10 +26,12 @@ services:
     environment:
       DEBUG: "true"
       POSTGRES_DB: synapse
-      POSTGRES_USER: synapse
+      POSTGRES_USER: synapse_app
       POSTGRES_PASSWORD: synapse
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
+      POSTGRES_SUPERUSER: synapse
+      POSTGRES_SUPERUSER_PASSWORD: synapse
     depends_on:
       db:
         condition: service_healthy

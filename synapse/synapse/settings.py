@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.RLSMiddleware'
 ]
 
 ROOT_URLCONF = 'synapse.urls'
@@ -85,11 +86,22 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRES_DB', 'synapse'),
-        'USER': os.getenv('POSTGRES_USER', 'synapse'),
+        'USER': os.getenv('POSTGRES_USER', 'synapse_app'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'synapse'),
         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
-    }
+        'ATOMIC_REQUESTS': True, # SET LOCAL only works for transaction.
+    },
+    # Superuser connection for migrations (bypasses RLS).
+    # Usage: python manage.py migrate --database=superuser
+    'superuser': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'synapse'),
+        'USER': os.getenv('POSTGRES_SUPERUSER', 'synapse'),
+        'PASSWORD': os.getenv('POSTGRES_SUPERUSER_PASSWORD', 'synapse'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+    },
 }
 
 

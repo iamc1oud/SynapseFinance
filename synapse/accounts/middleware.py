@@ -1,0 +1,51 @@
+from django.db import connection, transaction
+import logging
+
+logger = logging.getLogger(__name__)
+
+class RLSMiddleware:
+    """
+    Sets the current user ID for RLS policies.
+
+    Uses SET LOCAL which scopes the variables to the current transaction only.
+    Wraps the request in a transaction so SET LOCAL has an active transaction block.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user_id = self._get_user_id(request)
+        user_id=4
+
+        if user_id is not None:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.execute("SET LOCAL app.current_user_id = %s", [str(user_id)])
+                response = self.get_response(request)
+            return response
+
+        return self.get_response(request)
+
+    def _get_user_id(self, request):
+        """
+        Extract user ID from the request.
+
+        We use JWT auth via Django Ninja (not Django Sessions). we will decode the token here.
+        """
+
+        auth_header: str = request.META.get("HTTP_AUTHORIZATION", "")
+        if not auth_header.startswith("Bearer "):
+            return None
+
+        token = auth_header.split(" ", 1)[1]
+
+        try:
+            from accounts.auth import verify_access_token
+            user_id = verify_access_token(token)
+
+            print("RLSMiddleware: User ID - %s", user_id)
+
+            return user_id
+        except Exception:
+            return None
