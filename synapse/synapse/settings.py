@@ -33,6 +33,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,192.168.1.8").sp
 # Application definition
 CORE_APPS = [
     'accounts',
+    'ledger'
 ]
 
 PLUGINS = [
