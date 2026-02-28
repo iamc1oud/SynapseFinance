@@ -49,6 +49,7 @@ import '../../features/ledger/domain/usecases/get_accounts_usecase.dart'
 import '../../features/ledger/domain/usecases/get_categories_usecase.dart'
     as _i627;
 import '../../features/ledger/domain/usecases/get_tags_usecase.dart' as _i628;
+import '../theme/theme_cubit.dart' as _i636;
 import '../../features/ledger/domain/usecases/get_category_spending_usecase.dart'
     as _i633;
 import '../../features/ledger/domain/usecases/get_transactions_by_category_usecase.dart'
@@ -84,6 +85,9 @@ extension GetItInjectableX on _i174.GetIt {
     await gh.lazySingletonAsync<_i460.SharedPreferences>(
       () => sharedPreferencesModule.sharedPreferences,
       preResolve: true,
+    );
+    gh.lazySingleton<_i636.ThemeCubit>(
+      () => _i636.ThemeCubit(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i964.TokenStorage>(
       () => _i964.TokenStorage(gh<_i558.FlutterSecureStorage>()),

@@ -17,10 +17,11 @@ class TransactionTypeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: c.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -59,6 +60,7 @@ class _Tab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -66,7 +68,7 @@ class _Tab extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? c.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
@@ -75,9 +77,7 @@ class _Tab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? AppColors.background
-                    : AppColors.textSecondary,
+                color: isSelected ? c.background : c.textSecondary,
               ),
             ),
           ),

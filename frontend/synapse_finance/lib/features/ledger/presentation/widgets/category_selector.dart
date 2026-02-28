@@ -17,13 +17,14 @@ class CategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     if (categories.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 90,
         child: Center(
           child: Text(
             'No categories yet',
-            style: TextStyle(color: AppColors.textHint),
+            style: TextStyle(color: c.textHint),
           ),
         ),
       );
@@ -63,6 +64,7 @@ class _CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -74,13 +76,13 @@ class _CategoryItem extends StatelessWidget {
             height: 56,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isSelected ? AppColors.primary : AppColors.surfaceLight,
+              color: isSelected ? c.primary : c.surfaceLight,
             ),
             child: Center(
               child: Icon(
                 _iconForCategory(category.icon),
                 size: 24,
-                color: isSelected ? AppColors.background : AppColors.textSecondary,
+                color: isSelected ? c.background : c.textSecondary,
               ),
             ),
           ),
@@ -89,7 +91,7 @@ class _CategoryItem extends StatelessWidget {
             category.name,
             style: TextStyle(
               fontSize: 11,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              color: isSelected ? c.primary : c.textSecondary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),

@@ -9,7 +9,7 @@ import '../../domain/entities/transaction.dart';
 import '../bloc/transaction_list_cubit.dart';
 import '../bloc/transaction_list_state.dart';
 
-// ─── Icon helpers (shared with create_category_page) ──────────────────────────
+// ─── Icon helpers ─────────────────────────────────────────────────────────────
 
 IconData _iconForKey(String key) {
   const map = {
@@ -85,7 +85,7 @@ Color _colorForKey(String key) {
     case 'phone':
       return const Color(0xFF16A085);
     default:
-      return AppColors.primary;
+      return const Color(0xFF4ADE80); // bright green fallback, works both themes
   }
 }
 
@@ -116,33 +116,27 @@ class _TransactionListPageState extends State<TransactionListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return BlocBuilder<TransactionListCubit, TransactionListState>(
       builder: (context, state) {
         final cubit = context.read<TransactionListCubit>();
         return CustomScrollView(
           slivers: [
-            // Title row
-            SliverToBoxAdapter(child: _buildTitleRow()),
-            // Month label + Week/Month toggle
-            SliverToBoxAdapter(child: _buildDateNavRow(context, state, cubit)),
-            // 7-day strip (week mode only)
+            SliverToBoxAdapter(child: _buildTitleRow(c)),
+            SliverToBoxAdapter(child: _buildDateNavRow(context, state, cubit, c)),
             if (state.viewMode == ViewMode.week)
-              SliverToBoxAdapter(child: _buildWeekStrip(state, cubit)),
-            const SliverToBoxAdapter(
-              child: Divider(color: AppColors.border, height: 1),
+              SliverToBoxAdapter(child: _buildWeekStrip(state, cubit, c)),
+            SliverToBoxAdapter(
+              child: Divider(color: c.border, height: 1),
             ),
-            // Search bar
-            SliverToBoxAdapter(child: _buildSearchBar(cubit)),
-            // "Spending for…" total
-            SliverToBoxAdapter(child: _buildSpendingTotal(state)),
-            // AI suggestion
+            SliverToBoxAdapter(child: _buildSearchBar(cubit, c)),
+            SliverToBoxAdapter(child: _buildSpendingTotal(state, c)),
             if (!state.aiSuggestionDismissed)
               SliverToBoxAdapter(child: _buildAiCard(state, cubit)),
-            // Main content
             if (state.status == TransactionListStatus.loading)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 child: Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
+                  child: CircularProgressIndicator(color: c.primary),
                 ),
               )
             else if (state.status == TransactionListStatus.error)
@@ -174,31 +168,29 @@ class _TransactionListPageState extends State<TransactionListPage> {
     );
   }
 
-  // ── Title row ────────────────────────────────────────────────────────────────
-
-  Widget _buildTitleRow() {
+  Widget _buildTitleRow(AppColorScheme c) {
     return SafeArea(
       bottom: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
         child: Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Text(
                 'Transaction',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: c.textPrimary,
                 ),
               ),
             ),
             TextButton(
-              onPressed: null, // Edit mode – future feature
-              child: const Text(
+              onPressed: null,
+              child: Text(
                 'Edit',
-                style: TextStyle(color: AppColors.primary, fontSize: 15),
+                style: TextStyle(color: c.primary, fontSize: 15),
               ),
             ),
           ],
@@ -207,32 +199,23 @@ class _TransactionListPageState extends State<TransactionListPage> {
     );
   }
 
-  // ── Month label + Week/Month toggle ──────────────────────────────────────────
-
   Widget _buildDateNavRow(
     BuildContext context,
     TransactionListState state,
     TransactionListCubit cubit,
+    AppColorScheme c,
   ) {
-    final label = state.viewMode == ViewMode.week
-        ? DateFormat('MMMM yyyy').format(state.selectedDate)
-        : DateFormat('MMMM yyyy').format(state.selectedDate);
+    final label = DateFormat('MMMM yyyy').format(state.selectedDate);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
         children: [
-          // Previous period
           GestureDetector(
             onTap: cubit.previousPeriod,
-            child: const Icon(
-              Icons.chevron_left,
-              color: AppColors.textSecondary,
-              size: 22,
-            ),
+            child: Icon(Icons.chevron_left, color: c.textSecondary, size: 22),
           ),
           const SizedBox(width: 4),
-          // Month/year tap to open picker
           GestureDetector(
             onTap: () async {
               final picked = await showDatePicker(
@@ -240,16 +223,6 @@ class _TransactionListPageState extends State<TransactionListPage> {
                 initialDate: state.selectedDate,
                 firstDate: DateTime(2020),
                 lastDate: DateTime.now(),
-                builder: (context, child) => Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: const ColorScheme.dark(
-                      primary: AppColors.primary,
-                      surface: AppColors.surface,
-                      onSurface: AppColors.textPrimary,
-                    ),
-                  ),
-                  child: child!,
-                ),
               );
               if (picked != null && context.mounted) {
                 cubit.selectDate(picked);
@@ -260,33 +233,23 @@ class _TransactionListPageState extends State<TransactionListPage> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: c.textPrimary,
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(
-                  Icons.keyboard_arrow_down,
-                  color: AppColors.textSecondary,
-                  size: 18,
-                ),
+                Icon(Icons.keyboard_arrow_down, color: c.textSecondary, size: 18),
               ],
             ),
           ),
           const Spacer(),
-          // Next period
           GestureDetector(
             onTap: cubit.nextPeriod,
-            child: const Icon(
-              Icons.chevron_right,
-              color: AppColors.textSecondary,
-              size: 22,
-            ),
+            child: Icon(Icons.chevron_right, color: c.textSecondary, size: 22),
           ),
           const SizedBox(width: 8),
-          // Week / Month toggle
           _ViewModeToggle(
             viewMode: state.viewMode,
             onChanged: cubit.setViewMode,
@@ -296,11 +259,10 @@ class _TransactionListPageState extends State<TransactionListPage> {
     );
   }
 
-  // ── 7-day strip ──────────────────────────────────────────────────────────────
-
   Widget _buildWeekStrip(
     TransactionListState state,
     TransactionListCubit cubit,
+    AppColorScheme c,
   ) {
     const dayNames = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
     final weekDays = state.weekDays;
@@ -324,7 +286,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
                 margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : AppColors.surface,
+                  color: isSelected ? c.primary : c.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -335,9 +297,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
-                        color: isSelected
-                            ? AppColors.background
-                            : AppColors.textSecondary,
+                        color: isSelected ? c.background : c.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -347,12 +307,12 @@ class _TransactionListPageState extends State<TransactionListPage> {
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: isSelected
-                            ? AppColors.background
+                            ? c.background
                             : isFuture
-                            ? AppColors.textHint
+                            ? c.textHint
                             : isToday
-                            ? AppColors.primary
-                            : AppColors.textPrimary,
+                            ? c.primary
+                            : c.textPrimary,
                       ),
                     ),
                   ],
@@ -365,40 +325,32 @@ class _TransactionListPageState extends State<TransactionListPage> {
     );
   }
 
-  // ── Search bar ───────────────────────────────────────────────────────────────
-
-  Widget _buildSearchBar(TransactionListCubit cubit) {
+  Widget _buildSearchBar(TransactionListCubit cubit, AppColorScheme c) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
       child: Container(
         height: 44,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: c.surface,
           borderRadius: BorderRadius.circular(12),
         ),
         child: TextField(
           controller: _searchController,
           onChanged: cubit.updateSearch,
-          style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-          decoration: const InputDecoration(
+          style: TextStyle(color: c.textPrimary, fontSize: 14),
+          decoration: InputDecoration(
             hintText: 'Search categories or sub-categories',
-            hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13),
-            prefixIcon: Icon(
-              Icons.search,
-              color: AppColors.textSecondary,
-              size: 20,
-            ),
+            hintStyle: TextStyle(color: c.textHint, fontSize: 13),
+            prefixIcon: Icon(Icons.search, color: c.textSecondary, size: 20),
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ),
     );
   }
 
-  // ── Spending total header ────────────────────────────────────────────────────
-
-  Widget _buildSpendingTotal(TransactionListState state) {
+  Widget _buildSpendingTotal(TransactionListState state, AppColorScheme c) {
     final label = state.viewMode == ViewMode.week
         ? DateFormat('MMM d, yyyy').format(state.selectedDate)
         : DateFormat('MMMM yyyy').format(state.selectedDate);
@@ -407,34 +359,25 @@ class _TransactionListPageState extends State<TransactionListPage> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
         children: [
-          const Icon(
-            Icons.calendar_month_outlined,
-            color: AppColors.textSecondary,
-            size: 17,
-          ),
+          Icon(Icons.calendar_month_outlined, color: c.textSecondary, size: 17),
           const SizedBox(width: 8),
           Text(
             'Spending for $label',
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: c.textSecondary),
           ),
           const Spacer(),
           Text(
             '\$${NumberFormat('#,##0.00').format(state.totalSpending)}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: c.textPrimary,
             ),
           ),
         ],
       ),
     );
   }
-
-  // ── AI Suggestion card ───────────────────────────────────────────────────────
 
   Widget _buildAiCard(TransactionListState state, TransactionListCubit cubit) {
     String suggestion;
@@ -472,11 +415,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
                 color: const Color(0xFF1E5090),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(
-                Icons.auto_awesome,
-                color: Colors.white,
-                size: 18,
-              ),
+              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -528,10 +467,11 @@ class _ViewModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: c.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -566,13 +506,14 @@ class _ToggleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : Colors.transparent,
+          color: selected ? c.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
@@ -580,7 +521,7 @@ class _ToggleBtn extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: selected ? AppColors.background : AppColors.textSecondary,
+            color: selected ? c.background : c.textSecondary,
           ),
         ),
       ),
@@ -595,15 +536,16 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
+    final c = context.appColors;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Text(
         'SPENDING BY CATEGORY',
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
-          color: AppColors.textSecondary,
+          color: c.textSecondary,
         ),
       ),
     );
@@ -629,6 +571,7 @@ class _CategoryGroupTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     final color = _colorForKey(group.categoryIcon);
     final fraction = totalSpending > 0
         ? (group.total / totalSpending).clamp(0.0, 1.0)
@@ -638,23 +581,19 @@ class _CategoryGroupTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: c.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: c.border),
         ),
         child: Column(
           children: [
-            // ── Category header row ──
             InkWell(
               onTap: onToggle,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Row(
                   children: [
-                    // Colored icon square
                     Container(
                       width: 52,
                       height: 52,
@@ -673,15 +612,14 @@ class _CategoryGroupTile extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Name + badge
                           Row(
                             children: [
                               Text(
                                 group.categoryName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                                  color: c.textPrimary,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -689,7 +627,6 @@ class _CategoryGroupTile extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          // Progress bar
                           Row(
                             children: [
                               Expanded(
@@ -697,10 +634,8 @@ class _CategoryGroupTile extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(4),
                                   child: LinearProgressIndicator(
                                     value: fraction,
-                                    backgroundColor: AppColors.border,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      color,
-                                    ),
+                                    backgroundColor: c.border,
+                                    valueColor: AlwaysStoppedAnimation<Color>(color),
                                     minHeight: 4,
                                   ),
                                 ),
@@ -708,9 +643,9 @@ class _CategoryGroupTile extends StatelessWidget {
                               const SizedBox(width: 10),
                               Text(
                                 '\$${NumberFormat('#,##0.##').format(group.total)}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: AppColors.textSecondary,
+                                  color: c.textSecondary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -720,13 +655,12 @@ class _CategoryGroupTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Chevron
                     AnimatedRotation(
                       turns: isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 200),
-                      child: const Icon(
+                      child: Icon(
                         Icons.keyboard_arrow_down,
-                        color: AppColors.textSecondary,
+                        color: c.textSecondary,
                         size: 22,
                       ),
                     ),
@@ -734,23 +668,16 @@ class _CategoryGroupTile extends StatelessWidget {
                 ),
               ),
             ),
-            // ── Transactions (animated) ──
             AnimatedSize(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               child: isExpanded
                   ? Column(
                       children: [
-                        const Divider(
-                          color: AppColors.border,
-                          height: 1,
-                          indent: 16,
-                          endIndent: 16,
-                        ),
+                        Divider(color: c.border, height: 1, indent: 16, endIndent: 16),
                         ...group.transactions.map(
                           (t) => _TransactionItem(transaction: t),
                         ),
-                        // Add Transaction link
                         InkWell(
                           onTap: onAddTransaction,
                           borderRadius: const BorderRadius.vertical(
@@ -760,17 +687,13 @@ class _CategoryGroupTile extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(
-                                  Icons.add_circle_outline,
-                                  color: AppColors.primary,
-                                  size: 18,
-                                ),
-                                SizedBox(width: 6),
+                              children: [
+                                Icon(Icons.add_circle_outline, color: c.primary, size: 18),
+                                const SizedBox(width: 6),
                                 Text(
                                   'Add Transaction',
                                   style: TextStyle(
-                                    color: AppColors.primary,
+                                    color: c.primary,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14,
                                   ),
@@ -846,6 +769,7 @@ class _TransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     final title = transaction.note.isNotEmpty
         ? transaction.note
         : transaction.category?.name ?? 'Transaction';
@@ -862,24 +786,21 @@ class _TransactionItem extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: c.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: TextStyle(fontSize: 12, color: c.textSecondary),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.drag_handle, color: AppColors.textHint, size: 20),
+          Icon(Icons.drag_handle, color: c.textHint, size: 20),
         ],
       ),
     );
@@ -893,28 +814,25 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final c = context.appColors;
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            size: 56,
-            color: AppColors.textHint,
-          ),
-          SizedBox(height: 16),
+          Icon(Icons.receipt_long_outlined, size: 56, color: c.textHint),
+          const SizedBox(height: 16),
           Text(
             'No transactions',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: c.textSecondary,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Tap + to record a transaction',
-            style: TextStyle(fontSize: 14, color: AppColors.textHint),
+            style: TextStyle(fontSize: 14, color: c.textHint),
           ),
         ],
       ),
@@ -932,16 +850,17 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+          Icon(Icons.error_outline, size: 48, color: c.error),
           const SizedBox(height: 12),
           Text(
             message ?? 'Something went wrong',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: c.textSecondary),
           ),
           const SizedBox(height: 20),
           TextButton(onPressed: cubit.loadData, child: const Text('Retry')),

@@ -69,7 +69,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
     final isExpense = state.transactionType == TransactionType.expense;
     setState(() {
       _showSuccess = true;
-      _savedLabel = state.selectedCategory?.name.toUpperCase() ??
+      _savedLabel =
+          state.selectedCategory?.name.toUpperCase() ??
           (isExpense ? 'EXPENSE' : 'INCOME');
       _savedAmount = _formatAmount(state.displayAmount);
       _savedTitle = isExpense ? 'Expense Recorded!' : 'Income Recorded!';
@@ -93,6 +94,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return BlocConsumer<AddTransactionCubit, AddTransactionState>(
       listener: (context, state) {
         if (state.status == AddTransactionStatus.saved && !_showSuccess) {
@@ -103,7 +105,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
-              backgroundColor: AppColors.error,
+              backgroundColor: c.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -125,17 +127,17 @@ class _AddTransactionPageState extends State<AddTransactionPage>
 
         final cubit = context.read<AddTransactionCubit>();
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: c.background,
           appBar: AppBar(
-            backgroundColor: AppColors.background,
+            backgroundColor: c.background,
             leading: IconButton(
-              icon: const Icon(Icons.close, color: AppColors.textSecondary),
+              icon: Icon(Icons.close, color: c.textSecondary),
               onPressed: () => context.pop(),
             ),
-            title: const Text(
+            title: Text(
               'Add Transaction',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -148,7 +150,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                 child: Text(
                   'SAVE',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: c.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -160,7 +162,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
           body: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: TransactionTypeToggle(
                   selected: state.transactionType,
                   onTypeSelected: cubit.switchType,
@@ -173,13 +178,13 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'CATEGORY',
                       style: TextStyle(
                         fontSize: 11,
                         letterSpacing: 1.2,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: c.textSecondary,
                       ),
                     ),
                     if (state.categories.isNotEmpty)
@@ -190,22 +195,19 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text(
+                        child: Text(
                           'View All',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 13,
-                          ),
+                          style: TextStyle(color: c.primary, fontSize: 13),
                         ),
                       ),
                   ],
                 ),
               ),
               if (state.status == AddTransactionStatus.loading)
-                const SizedBox(
+                SizedBox(
                   height: 90,
                   child: Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                    child: CircularProgressIndicator(color: c.primary),
                   ),
                 )
               else
@@ -222,8 +224,9 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                     _InfoRow(
                       icon: Icons.calendar_today_outlined,
                       label: 'DATE',
-                      value: DateFormat('EEEE, MMM d, yyyy')
-                          .format(state.selectedDate),
+                      value: DateFormat(
+                        'EEEE, MMM d, yyyy',
+                      ).format(state.selectedDate),
                       onTap: () async {
                         final date = await showDatePicker(
                           context: context,
@@ -231,15 +234,6 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                           firstDate: DateTime(2020),
                           lastDate: DateTime.now().add(
                             const Duration(days: 365),
-                          ),
-                          builder: (context, child) => Theme(
-                            data: Theme.of(context).copyWith(
-                              colorScheme: const ColorScheme.dark(
-                                primary: AppColors.primary,
-                                surface: AppColors.surface,
-                              ),
-                            ),
-                            child: child!,
                           ),
                         );
                         if (date != null) cubit.selectDate(date);
@@ -271,28 +265,25 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                         ? null
                         : cubit.save,
                     icon: state.status == AddTransactionStatus.saving
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.background,
+                              color: c.background,
                             ),
                           )
-                        : const Icon(
-                            Icons.check_circle,
-                            color: AppColors.background,
-                          ),
-                    label: const Text(
+                        : Icon(Icons.check_circle, color: c.background),
+                    label: Text(
                       'Save Transaction',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.background,
+                        color: c.background,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: c.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -333,8 +324,9 @@ class _SuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: c.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -342,22 +334,15 @@ class _SuccessScreen extends StatelessWidget {
             children: [
               const Spacer(flex: 2),
 
-              // ── Animated checkmark + pulse rings ──
               SizedBox(
                 width: 200,
                 height: 200,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Particles
-                    ..._buildParticles(),
-                    // 3 pulse rings staggered by 0.33
+                    ..._buildParticles(c),
                     for (var i = 0; i < 3; i++)
-                      _PulseRing(
-                        controller: pulseController,
-                        delay: i * 0.33,
-                      ),
-                    // Checkmark circle
+                      _PulseRing(controller: pulseController, delay: i * 0.33),
                     ScaleTransition(
                       scale: checkScale,
                       child: Container(
@@ -365,18 +350,18 @@ class _SuccessScreen extends StatelessWidget {
                         height: 88,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.primary,
+                          color: c.primary,
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.45),
+                              color: c.primary.withValues(alpha: 0.45),
                               blurRadius: 28,
                               spreadRadius: 4,
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.check_rounded,
-                          color: AppColors.background,
+                          color: c.background,
                           size: 48,
                         ),
                       ),
@@ -387,22 +372,20 @@ class _SuccessScreen extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              // ── Title ──
               FadeTransition(
                 opacity: fadeIn,
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: c.textPrimary,
                   ),
                 ),
               ),
 
               const SizedBox(height: 24),
 
-              // ── Amount card ──
               FadeTransition(
                 opacity: fadeIn,
                 child: Container(
@@ -412,28 +395,28 @@ class _SuccessScreen extends StatelessWidget {
                     horizontal: 24,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: c.surface,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: c.border),
                   ),
                   child: Column(
                     children: [
                       Text(
                         label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           letterSpacing: 1.8,
-                          color: AppColors.textSecondary,
+                          color: c.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '\$$amount',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 42,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: c.primary,
                           height: 1.0,
                         ),
                       ),
@@ -444,7 +427,6 @@ class _SuccessScreen extends StatelessWidget {
 
               const Spacer(flex: 2),
 
-              // ── Buttons ──
               FadeTransition(
                 opacity: fadeIn,
                 child: Column(
@@ -455,17 +437,17 @@ class _SuccessScreen extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: onAddAnother,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: c.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Add Another',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.background,
+                            color: c.background,
                           ),
                         ),
                       ),
@@ -477,8 +459,8 @@ class _SuccessScreen extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: onDone,
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.textPrimary,
-                          side: const BorderSide(color: AppColors.border),
+                          foregroundColor: c.textPrimary,
+                          side: BorderSide(color: c.border),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -492,17 +474,14 @@ class _SuccessScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     TextButton.icon(
                       onPressed: onDone,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
                         size: 15,
-                        color: AppColors.textSecondary,
+                        color: c.textSecondary,
                       ),
-                      label: const Text(
+                      label: Text(
                         'Back to Home',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: c.textSecondary, fontSize: 14),
                       ),
                     ),
                   ],
@@ -517,8 +496,7 @@ class _SuccessScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildParticles() {
-    // Small green dots scattered around the checkmark
+  List<Widget> _buildParticles(AppColorScheme c) {
     const dots = [
       Offset(18, 38),
       Offset(165, 28),
@@ -540,7 +518,7 @@ class _SuccessScreen extends StatelessWidget {
               height: 6,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: 0.6),
+                color: c.primary.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -560,6 +538,7 @@ class _PulseRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
@@ -575,7 +554,7 @@ class _PulseRing extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: opacity),
+                color: c.primary.withValues(alpha: opacity),
                 width: 1.5,
               ),
             ),
@@ -586,7 +565,7 @@ class _PulseRing extends StatelessWidget {
   }
 }
 
-// ─── Existing form widgets ─────────────────────────────────────────────────────
+// ─── Form widgets ──────────────────────────────────────────────────────────────
 
 class _AmountDisplay extends StatelessWidget {
   final String amount;
@@ -595,16 +574,17 @@ class _AmountDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         children: [
-          const Text(
+          Text(
             'AMOUNT',
             style: TextStyle(
               fontSize: 11,
               letterSpacing: 1.2,
-              color: AppColors.textSecondary,
+              color: c.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -614,20 +594,20 @@ class _AmountDisplay extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              const Text(
+              Text(
                 '\$',
                 style: TextStyle(
                   fontSize: 32,
-                  color: AppColors.primary,
+                  color: c.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 amount,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 56,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: c.textPrimary,
                 ),
               ),
             ],
@@ -653,44 +633,38 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: c.surface,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.textSecondary),
+            Icon(icon, size: 20, color: c.textSecondary),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     letterSpacing: 1.0,
-                    color: AppColors.textHint,
+                    color: c.textHint,
                   ),
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14, color: c.textPrimary),
                 ),
               ],
             ),
             const Spacer(),
-            const Icon(
-              Icons.chevron_right,
-              size: 18,
-              color: AppColors.textSecondary,
-            ),
+            Icon(Icons.chevron_right, size: 18, color: c.textSecondary),
           ],
         ),
       ),
@@ -706,32 +680,30 @@ class _NoteRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: c.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          const Icon(Icons.notes, size: 20, color: AppColors.textSecondary),
+          Icon(Icons.notes, size: 20, color: c.textSecondary),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
               controller: controller,
               onChanged: onChanged,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textPrimary,
-              ),
-              decoration: const InputDecoration(
+              style: TextStyle(fontSize: 14, color: c.textPrimary),
+              decoration: InputDecoration(
                 hintText: 'What was this for?',
-                hintStyle: TextStyle(color: AppColors.textHint, fontSize: 14),
+                hintStyle: TextStyle(color: c.textHint, fontSize: 14),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 filled: false,
-                contentPadding: EdgeInsets.symmetric(vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 isDense: true,
               ),
             ),

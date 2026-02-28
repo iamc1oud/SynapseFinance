@@ -45,16 +45,17 @@ class _PadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Center(
         child: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w400,
-            color: AppColors.textPrimary,
+            color: c.textPrimary,
           ),
         ),
       ),
@@ -69,14 +70,15 @@ class _DeleteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
-      child: const Center(
+      child: Center(
         child: Icon(
           Icons.backspace_outlined,
           size: 26,
-          color: AppColors.textPrimary,
+          color: c.textPrimary,
         ),
       ),
     );

@@ -67,6 +67,7 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return BlocConsumer<CreateCategoryCubit, CreateCategoryState>(
       listener: (context, state) {
         if (state.status == CreateCategoryStatus.saved) {
@@ -77,7 +78,7 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
-              backgroundColor: AppColors.error,
+              backgroundColor: c.error,
             ),
           );
         }
@@ -85,18 +86,18 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
       builder: (context, state) {
         final cubit = context.read<CreateCategoryCubit>();
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: c.background,
           appBar: AppBar(
-            backgroundColor: AppColors.background,
+            backgroundColor: c.background,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.close, color: AppColors.textPrimary),
+              icon: Icon(Icons.close, color: c.textPrimary),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            title: const Text(
+            title: Text(
               'New Category',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -108,18 +109,18 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                     ? null
                     : cubit.save,
                 child: state.status == CreateCategoryStatus.saving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.primary,
+                          color: c.primary,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'Save',
                         style: TextStyle(
-                          color: AppColors.primary,
+                          color: c.primary,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -132,14 +133,12 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Type toggle
                 _TypeToggle(
                   selected: state.categoryType,
                   onChanged: cubit.setCategoryType,
                 ),
                 const SizedBox(height: 28),
 
-                // Preview circle with selected icon
                 Center(
                   child: _IconPreview(
                     icon: _iconDataFor(state.selectedIcon),
@@ -148,30 +147,29 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                 ),
                 const SizedBox(height: 28),
 
-                // Name field
                 _SectionLabel('Category Name'),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _nameController,
                   onChanged: cubit.setName,
-                  style: const TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(color: c.textPrimary),
                   decoration: InputDecoration(
                     hintText: 'e.g. Coffee, Rent, Freelance...',
-                    hintStyle: const TextStyle(color: AppColors.textHint),
+                    hintStyle: TextStyle(color: c.textHint),
                     filled: true,
-                    fillColor: AppColors.surface,
+                    fillColor: c.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(color: c.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(color: c.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.borderFocused,
+                      borderSide: BorderSide(
+                        color: c.borderFocused,
                         width: 1.5,
                       ),
                     ),
@@ -183,7 +181,6 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                 ),
                 const SizedBox(height: 28),
 
-                // Icon picker
                 _SectionLabel('Choose Icon'),
                 const SizedBox(height: 12),
                 _IconGrid(
@@ -216,10 +213,11 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Text(
       text,
-      style: const TextStyle(
-        color: AppColors.textSecondary,
+      style: TextStyle(
+        color: c.textSecondary,
         fontSize: 13,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
@@ -236,10 +234,11 @@ class _TypeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: c.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -273,6 +272,7 @@ class _ToggleOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -280,16 +280,14 @@ class _ToggleOption extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? c.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(9),
           ),
           alignment: Alignment.center,
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected
-                  ? AppColors.background
-                  : AppColors.textSecondary,
+              color: isSelected ? c.background : c.textSecondary,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               fontSize: 14,
             ),
@@ -308,22 +306,23 @@ class _IconPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 72,
           height: 72,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.primary,
+            color: c.primary,
           ),
-          child: Icon(icon, size: 32, color: AppColors.background),
+          child: Icon(icon, size: 32, color: c.background),
         ),
         const SizedBox(height: 8),
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: TextStyle(color: c.textSecondary, fontSize: 13),
         ),
       ],
     );
@@ -338,6 +337,7 @@ class _IconGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -362,19 +362,15 @@ class _IconGrid extends StatelessWidget {
                 height: 52,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.surfaceLight,
+                  color: isSelected ? c.primary : c.surfaceLight,
                   border: isSelected
                       ? null
-                      : Border.all(color: AppColors.border, width: 1),
+                      : Border.all(color: c.border, width: 1),
                 ),
                 child: Icon(
                   iconData,
                   size: 22,
-                  color: isSelected
-                      ? AppColors.background
-                      : AppColors.textSecondary,
+                  color: isSelected ? c.background : c.textSecondary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -382,7 +378,7 @@ class _IconGrid extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 10,
-                  color: isSelected ? AppColors.primary : AppColors.textHint,
+                  color: isSelected ? c.primary : c.textHint,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
                 maxLines: 1,

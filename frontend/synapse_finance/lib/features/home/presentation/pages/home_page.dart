@@ -6,10 +6,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../ledger/domain/usecases/get_transactions_by_category_usecase.dart';
 import '../../../ledger/presentation/bloc/transaction_list_cubit.dart';
 import '../../../ledger/presentation/pages/transaction_list_page.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,20 +30,21 @@ class _HomePageState extends State<HomePage> {
       child: const TransactionListPage(),
     ),
     const _CategoriesTab(),
-    const _SettingsTab(),
+    const SettingsPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Scaffold(
-      extendBody: true, // content flows under the translucent nav bar
-      backgroundColor: AppColors.background,
+      extendBody: true,
+      backgroundColor: c.background,
       body: IndexedStack(index: _currentIndex, children: _tabs),
       floatingActionButton: _currentIndex != 3
           ? FloatingActionButton(
               onPressed: () => context.push('/add-transaction'),
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.background,
+              backgroundColor: c.primary,
+              foregroundColor: c.background,
               child: const Icon(Icons.add),
             )
           : null,
@@ -72,6 +73,7 @@ class _FrostedNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return ClipRect(
@@ -79,10 +81,10 @@ class _FrostedNavBar extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF122112).withValues(alpha: 0.72),
+            color: c.surface.withValues(alpha: 0.72),
             border: Border(
               top: BorderSide(
-                color: AppColors.primary.withValues(alpha: 0.12),
+                color: c.primary.withValues(alpha: 0.12),
                 width: 0.5,
               ),
             ),
@@ -126,6 +128,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -142,13 +145,13 @@ class _NavItem extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.18)
+                    ? c.primary.withValues(alpha: 0.18)
                     : Colors.transparent,
               ),
               child: Icon(
                 icon,
                 size: 22,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected ? c.primary : c.textSecondary,
               ),
             ),
             const SizedBox(height: 3),
@@ -157,7 +160,7 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected ? c.primary : c.textSecondary,
               ),
               child: Text(label),
             ),
@@ -175,25 +178,26 @@ class _AssistantTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    final c = context.appColors;
+    return SafeArea(
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.auto_awesome, size: 56, color: AppColors.primary),
-            SizedBox(height: 16),
+            Icon(Icons.auto_awesome, size: 56, color: c.primary),
+            const SizedBox(height: 16),
             Text(
               'AI Assistant',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               'Chat to log expenses or get insights',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: c.textSecondary),
             ),
           ],
         ),
@@ -207,75 +211,40 @@ class _CategoriesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return SafeArea(
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.category, size: 56, color: AppColors.primary),
+            Icon(Icons.category, size: 56, color: c.primary),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Manage Categories',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Organise your spending by category',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: c.textSecondary),
             ),
             const SizedBox(height: 32),
             TextButton.icon(
               onPressed: () => context.push('/create-category'),
-              icon: const Icon(Icons.add_circle_outline),
-              label: const Text('New Category'),
+              icon: Icon(Icons.add_circle_outline, color: c.primary),
+              label: Text(
+                'New Category',
+                style: TextStyle(color: c.primary),
+              ),
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
                 textStyle: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsTab extends StatelessWidget {
-  const _SettingsTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.settings, size: 56, color: AppColors.primary),
-            const SizedBox(height: 16),
-            const Text(
-              'Settings',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 32),
-            OutlinedButton.icon(
-              onPressed: () => context.read<AuthCubit>().logout(),
-              icon: const Icon(Icons.logout),
-              label: const Text('Log Out'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.error),
-                minimumSize: const Size(180, 48),
               ),
             ),
           ],

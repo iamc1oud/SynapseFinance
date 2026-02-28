@@ -30,13 +30,14 @@ class AuthTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: c.textPrimary,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -49,7 +50,7 @@ class AuthTextField extends StatelessWidget {
           onChanged: onChanged,
           textInputAction: textInputAction,
           onEditingComplete: onEditingComplete,
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: c.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
             suffixIcon: suffixIcon,

@@ -35,13 +35,14 @@ class _AddTransferPageState extends State<AddTransferPage> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return BlocConsumer<AddTransferCubit, AddTransferState>(
       listener: (context, state) {
         if (state.status == AddTransferStatus.saved) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Transfer completed!'),
-              backgroundColor: AppColors.success,
+            SnackBar(
+              content: const Text('Transfer completed!'),
+              backgroundColor: c.success,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -52,7 +53,7 @@ class _AddTransferPageState extends State<AddTransferPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
-              backgroundColor: AppColors.error,
+              backgroundColor: c.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -61,21 +62,21 @@ class _AddTransferPageState extends State<AddTransferPage> {
       builder: (context, state) {
         final cubit = context.read<AddTransferCubit>();
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: c.background,
           appBar: AppBar(
-            backgroundColor: AppColors.background,
+            backgroundColor: c.background,
             leading: TextButton(
               onPressed: () => context.pop(),
-              child: const Text(
+              child: Text(
                 'Cancel',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: c.textSecondary),
               ),
             ),
             leadingWidth: 80,
-            title: const Text(
+            title: Text(
               'Manual Transfer',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -86,15 +87,14 @@ class _AddTransferPageState extends State<AddTransferPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Transfer amount
                 const SizedBox(height: 24),
-                const Center(
+                Center(
                   child: Text(
                     'TRANSFER AMOUNT',
                     style: TextStyle(
                       fontSize: 11,
                       letterSpacing: 1.2,
-                      color: AppColors.textSecondary,
+                      color: c.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -106,23 +106,21 @@ class _AddTransferPageState extends State<AddTransferPage> {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      const Text(
+                      Text(
                         '\$',
                         style: TextStyle(
                           fontSize: 28,
-                          color: AppColors.primary,
+                          color: c.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        state.amountInput == '0'
-                            ? '0.00'
-                            : state.amountInput,
-                        style: const TextStyle(
+                        state.amountInput == '0' ? '0.00' : state.amountInput,
+                        style: TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: c.textPrimary,
                         ),
                       ),
                     ],
@@ -131,10 +129,9 @@ class _AddTransferPageState extends State<AddTransferPage> {
 
                 const SizedBox(height: 24),
 
-                // From account
                 if (state.status == AddTransferStatus.loading)
-                  const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                  Center(
+                    child: CircularProgressIndicator(color: c.primary),
                   )
                 else ...[
                   _AccountCard(
@@ -145,20 +142,19 @@ class _AddTransferPageState extends State<AddTransferPage> {
                     onSelected: cubit.selectFromAccount,
                   ),
 
-                  // Arrow
                   Center(
                     child: Container(
                       width: 36,
                       height: 36,
                       margin: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primary,
+                        color: c.primary,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_downward,
                         size: 20,
-                        color: AppColors.background,
+                        color: c.background,
                       ),
                     ),
                   ),
@@ -174,7 +170,6 @@ class _AddTransferPageState extends State<AddTransferPage> {
 
                 const SizedBox(height: 16),
 
-                // Date
                 _InfoRow(
                   icon: Icons.calendar_today_outlined,
                   label: 'DATE',
@@ -185,15 +180,6 @@ class _AddTransferPageState extends State<AddTransferPage> {
                       initialDate: state.selectedDate,
                       firstDate: DateTime(2020),
                       lastDate: DateTime.now().add(const Duration(days: 365)),
-                      builder: (context, child) => Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: const ColorScheme.dark(
-                            primary: AppColors.primary,
-                            surface: AppColors.surface,
-                          ),
-                        ),
-                        child: child!,
-                      ),
                     );
                     if (date != null) cubit.selectDate(date);
                   },
@@ -201,40 +187,39 @@ class _AddTransferPageState extends State<AddTransferPage> {
 
                 const SizedBox(height: 12),
 
-                // Memo
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: c.surface,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.description_outlined,
                         size: 20,
-                        color: AppColors.textSecondary,
+                        color: c.textSecondary,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
                           controller: _noteController,
                           onChanged: cubit.updateNote,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.textPrimary,
+                            color: c.textPrimary,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'Add a note...',
                             hintStyle: TextStyle(
-                              color: AppColors.textHint,
+                              color: c.textHint,
                               fontSize: 14,
                             ),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
                             filled: false,
-                            contentPadding: EdgeInsets.symmetric(vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
                             isDense: true,
                           ),
                         ),
@@ -243,15 +228,14 @@ class _AddTransferPageState extends State<AddTransferPage> {
                   ),
                 ),
 
-                // Quick Tags
                 if (state.tags.isNotEmpty) ...[
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'QUICK TAGS',
                     style: TextStyle(
                       fontSize: 11,
                       letterSpacing: 1.2,
-                      color: AppColors.textSecondary,
+                      color: c.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -272,7 +256,6 @@ class _AddTransferPageState extends State<AddTransferPage> {
 
                 const SizedBox(height: 24),
 
-                // Number Pad
                 NumberPad(
                   onDigit: cubit.inputDigit,
                   onDelete: cubit.deleteDigit,
@@ -280,7 +263,6 @@ class _AddTransferPageState extends State<AddTransferPage> {
 
                 const SizedBox(height: 16),
 
-                // Confirm button
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -289,26 +271,26 @@ class _AddTransferPageState extends State<AddTransferPage> {
                         ? null
                         : cubit.confirm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: c.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     child: state.status == AddTransferStatus.saving
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 22,
                             height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.background,
+                              color: c.background,
                             ),
                           )
-                        : const Text(
+                        : Text(
                             'Confirm Transfer',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.background,
+                              color: c.background,
                             ),
                           ),
                   ),
@@ -341,16 +323,15 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return GestureDetector(
-      onTap: accounts.isEmpty
-          ? null
-          : () => _showAccountPicker(context),
+      onTap: accounts.isEmpty ? null : () => _showAccountPicker(context, c),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: c.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: c.border),
         ),
         child: Row(
           children: [
@@ -358,10 +339,10 @@ class _AccountCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
+                color: c.surfaceLight,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: AppColors.primary, size: 22),
+              child: Icon(icon, color: c.primary, size: 22),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -370,46 +351,43 @@ class _AccountCard extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       letterSpacing: 1.0,
-                      color: AppColors.textHint,
+                      color: c.textHint,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     account?.name ?? 'Select account',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: c.textPrimary,
                     ),
                   ),
                   if (account != null)
                     Text(
                       'Balance: ${account!.formattedBalance}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: c.textSecondary,
                       ),
                     ),
                 ],
               ),
             ),
-            const Icon(
-              Icons.keyboard_arrow_down,
-              color: AppColors.textSecondary,
-            ),
+            Icon(Icons.keyboard_arrow_down, color: c.textSecondary),
           ],
         ),
       ),
     );
   }
 
-  void _showAccountPicker(BuildContext context) {
+  void _showAccountPicker(BuildContext context, AppColorScheme c) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: c.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -421,23 +399,20 @@ class _AccountCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               'Select $label',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
               ),
             ),
           ),
           ...accounts.map(
             (a) => ListTile(
-              leading: const Icon(Icons.account_balance, color: AppColors.primary),
-              title: Text(
-                a.name,
-                style: const TextStyle(color: AppColors.textPrimary),
-              ),
+              leading: Icon(Icons.account_balance, color: c.primary),
+              title: Text(a.name, style: TextStyle(color: c.textPrimary)),
               subtitle: Text(
                 a.formattedBalance,
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: c.textSecondary),
               ),
               onTap: () {
                 onSelected(a);
@@ -464,22 +439,23 @@ class _TagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withAlpha(40) : AppColors.surfaceLight,
+          color: isSelected ? c.primary.withAlpha(40) : c.surfaceLight,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? c.primary : Colors.transparent,
           ),
         ),
         child: Text(
           tag.name,
           style: TextStyle(
-            color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            color: isSelected ? c.primary : c.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             fontSize: 14,
           ),
@@ -504,44 +480,41 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: c.surface,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.textSecondary),
+            Icon(icon, size: 20, color: c.textSecondary),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     letterSpacing: 1.0,
-                    color: AppColors.textHint,
+                    color: c.textHint,
                   ),
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textPrimary,
+                    color: c.textPrimary,
                   ),
                 ),
               ],
             ),
             const Spacer(),
-            const Icon(
-              Icons.chevron_right,
-              size: 18,
-              color: AppColors.textSecondary,
-            ),
+            Icon(Icons.chevron_right, size: 18, color: c.textSecondary),
           ],
         ),
       ),

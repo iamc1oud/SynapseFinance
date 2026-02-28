@@ -40,13 +40,14 @@ class _LoginViewState extends State<_LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return BlocConsumer<LoginCubit, LoginState>(
       listener: (context, state) {
         if (state.status == LoginStatus.failure && state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
-              backgroundColor: AppColors.error,
+              backgroundColor: c.error,
             ),
           );
         }
@@ -61,21 +62,21 @@ class _LoginViewState extends State<_LoginView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 32),
-                  const Text(
+                  Text(
                     'Welcome Back',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: c.textPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Manage your expenses with the power of AI.',
                     style: TextStyle(
                       fontSize: 16,
-                      color: AppColors.textSecondary,
+                      color: c.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -96,18 +97,16 @@ class _LoginViewState extends State<_LoginView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Password',
                             style: TextStyle(
-                              color: AppColors.textPrimary,
+                              color: c.textPrimary,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           TextButton(
-                            onPressed: () {
-                              // TODO: Navigate to forgot password
-                            },
+                            onPressed: () {},
                             child: const Text('Forgot Password?'),
                           ),
                         ],
@@ -120,7 +119,7 @@ class _LoginViewState extends State<_LoginView> {
                         onEditingComplete: () =>
                             context.read<LoginCubit>().login(),
                         onChanged: context.read<LoginCubit>().passwordChanged,
-                        style: const TextStyle(color: AppColors.textPrimary),
+                        style: TextStyle(color: c.textPrimary),
                         decoration: InputDecoration(
                           hintText: 'Enter your password',
                           errorText: state.passwordError,
@@ -129,7 +128,7 @@ class _LoginViewState extends State<_LoginView> {
                               state.obscurePassword
                                   ? Icons.visibility_off
                                   : Icons.visibility,
-                              color: AppColors.textSecondary,
+                              color: c.textSecondary,
                             ),
                             onPressed: () => context
                                 .read<LoginCubit>()
@@ -145,12 +144,12 @@ class _LoginViewState extends State<_LoginView> {
                         ? null
                         : () => context.read<LoginCubit>().login(),
                     child: state.status == LoginStatus.loading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.textPrimary,
+                              color: c.textPrimary,
                             ),
                           )
                         : const Text('Log In'),
@@ -158,29 +157,19 @@ class _LoginViewState extends State<_LoginView> {
                   const SizedBox(height: 32),
                   const _OrDivider(),
                   const SizedBox(height: 32),
-                  SocialLoginButton.google(
-                    onPressed: () {
-                      // TODO: Implement Google login
-                    },
-                  ),
+                  SocialLoginButton.google(onPressed: () {}),
                   const SizedBox(height: 16),
-                  SocialLoginButton.apple(
-                    onPressed: () {
-                      // TODO: Implement Apple login
-                    },
-                  ),
+                  SocialLoginButton.apple(onPressed: () {}),
                   const SizedBox(height: 32),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         "Don't have an account? ",
-                        style: TextStyle(color: AppColors.textSecondary),
+                        style: TextStyle(color: c.textSecondary),
                       ),
                       TextButton(
-                        onPressed: () {
-                          // TODO: Navigate to sign up
-                        },
+                        onPressed: () {},
                         child: const Text('Sign Up'),
                       ),
                     ],
@@ -201,21 +190,22 @@ class _OrDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    final c = context.appColors;
+    return Row(
       children: [
-        Expanded(child: Divider()),
+        const Expanded(child: Divider()),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'OR CONTINUE WITH',
             style: TextStyle(
-              color: AppColors.textSecondary,
+              color: c.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
-        Expanded(child: Divider()),
+        const Expanded(child: Divider()),
       ],
     );
   }
