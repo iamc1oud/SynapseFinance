@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
+import '../../../ledger/domain/usecases/get_transactions_by_category_usecase.dart';
+import '../../../ledger/presentation/bloc/transaction_list_cubit.dart';
+import '../../../ledger/presentation/pages/transaction_list_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,11 +21,16 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  static const _tabs = [
-    _AssistantTab(),
-    _InsightsTab(),
-    _CategoriesTab(),
-    _SettingsTab(),
+  final _tabs = [
+    const _AssistantTab(),
+    BlocProvider(
+      create: (_) => TransactionListCubit(
+        getIt<GetTransactionsByCategoryUseCase>(),
+      ),
+      child: const TransactionListPage(),
+    ),
+    const _CategoriesTab(),
+    const _SettingsTab(),
   ];
 
   @override
@@ -184,42 +193,6 @@ class _AssistantTab extends StatelessWidget {
             SizedBox(height: 8),
             Text(
               'Chat to log expenses or get insights',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InsightsTab extends StatelessWidget {
-  const _InsightsTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.account_balance_wallet,
-              size: 64,
-              color: AppColors.primary,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Welcome to AI Expense Manager',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Your dashboard will appear here',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ],

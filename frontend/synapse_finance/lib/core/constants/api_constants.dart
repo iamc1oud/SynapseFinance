@@ -18,6 +18,10 @@ class ApiConstants {
   static const String expenseTransaction = '/ledger/transactions/expense';
   static const String incomeTransaction = '/ledger/transactions/income';
   static const String transferTransaction = '/ledger/transactions/transfer';
+  static const String categorySpending =
+      '/ledger/transactions/spending-by-category';
+  static const String transactionsByCategory =
+      '/ledger/transactions/by-category';
 
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 30);

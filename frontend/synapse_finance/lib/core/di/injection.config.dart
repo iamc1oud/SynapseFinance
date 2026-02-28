@@ -49,10 +49,18 @@ import '../../features/ledger/domain/usecases/get_accounts_usecase.dart'
 import '../../features/ledger/domain/usecases/get_categories_usecase.dart'
     as _i627;
 import '../../features/ledger/domain/usecases/get_tags_usecase.dart' as _i628;
+import '../../features/ledger/domain/usecases/get_category_spending_usecase.dart'
+    as _i633;
+import '../../features/ledger/domain/usecases/get_transactions_by_category_usecase.dart'
+    as _i635;
+import '../../features/ledger/domain/usecases/get_transactions_usecase.dart'
+    as _i632;
 import '../../features/ledger/presentation/bloc/add_transaction_cubit.dart'
     as _i629;
 import '../../features/ledger/presentation/bloc/add_transfer_cubit.dart'
     as _i630;
+import '../../features/ledger/presentation/bloc/transaction_list_cubit.dart'
+    as _i634;
 import '../network/auth_event_bus.dart' as _i100;
 import '../network/auth_interceptor.dart' as _i908;
 import '../network/dio_client.dart' as _i667;
@@ -178,6 +186,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i626.GetAccountsUseCase>(),
         gh<_i628.GetTagsUseCase>(),
         gh<_i625.CreateTransferUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i632.GetTransactionsUseCase>(
+      () => _i632.GetTransactionsUseCase(gh<_i622.LedgerRepository>()),
+    );
+    gh.lazySingleton<_i633.GetCategorySpendingUseCase>(
+      () => _i633.GetCategorySpendingUseCase(gh<_i622.LedgerRepository>()),
+    );
+    gh.lazySingleton<_i635.GetTransactionsByCategoryUseCase>(
+      () => _i635.GetTransactionsByCategoryUseCase(gh<_i622.LedgerRepository>()),
+    );
+    gh.factory<_i634.TransactionListCubit>(
+      () => _i634.TransactionListCubit(
+        gh<_i635.GetTransactionsByCategoryUseCase>(),
       ),
     );
     return this;

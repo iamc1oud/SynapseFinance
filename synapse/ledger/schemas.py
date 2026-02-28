@@ -111,6 +111,14 @@ class CreateTransferRequest(Schema):
     tag_ids: list[int] = []
 
 
+class CategorySpendingResponse(Schema):
+    """Total spending per expense category within a date range."""
+    category_id: int
+    category_name: str
+    category_icon: str
+    total: Decimal
+
+
 class TransactionResponse(Schema):
     id: int
     transaction_type: str
@@ -143,3 +151,12 @@ class TransactionResponse(Schema):
             tags=[TagResponse.from_tag(t) for t in txn.tags.all()],
             created_at=txn.created_at.isoformat(),
         )
+
+
+class CategoryTransactionGroupResponse(Schema):
+    """Expense transactions grouped by category — category summary plus all individual transactions."""
+    category_id: int
+    category_name: str
+    category_icon: str
+    total: Decimal
+    transactions: list[TransactionResponse] = []

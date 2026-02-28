@@ -1,10 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:intl/intl.dart';
+
 import '../../../../core/constants/api_constants.dart';
 import '../models/account_model.dart';
 import '../models/category_model.dart';
+import '../models/category_spending_model.dart';
+import '../models/category_transaction_group_model.dart';
 import '../models/tag_model.dart';
+import '../models/transaction_model.dart';
 
 @lazySingleton
 class LedgerApiClient {
@@ -97,5 +102,74 @@ class LedgerApiClient {
       'note': note,
       'tag_ids': tagIds,
     });
+  }
+
+  Future<List<TransactionModel>> getTransactions({
+    String? transactionType,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) async {
+    final params = <String, dynamic>{};
+    if (transactionType != null) params['transaction_type'] = transactionType;
+    if (dateFrom != null) {
+      params['date_from'] = DateFormat('yyyy-MM-dd').format(dateFrom);
+    }
+    if (dateTo != null) {
+      params['date_to'] = DateFormat('yyyy-MM-dd').format(dateTo);
+    }
+    final response = await _dio.get(
+      ApiConstants.transactions,
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    final list = response.data as List<dynamic>;
+    return list
+        .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<CategorySpendingModel>> getCategorySpending({
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) async {
+    final params = <String, dynamic>{};
+    if (dateFrom != null) {
+      params['date_from'] = DateFormat('yyyy-MM-dd').format(dateFrom);
+    }
+    if (dateTo != null) {
+      params['date_to'] = DateFormat('yyyy-MM-dd').format(dateTo);
+    }
+    final response = await _dio.get(
+      ApiConstants.categorySpending,
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    final list = response.data as List<dynamic>;
+    return list
+        .map((e) => CategorySpendingModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<CategoryTransactionGroupModel>> getTransactionsByCategory({
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) async {
+    final params = <String, dynamic>{};
+    if (dateFrom != null) {
+      params['date_from'] = DateFormat('yyyy-MM-dd').format(dateFrom);
+    }
+    if (dateTo != null) {
+      params['date_to'] = DateFormat('yyyy-MM-dd').format(dateTo);
+    }
+    final response = await _dio.get(
+      ApiConstants.transactionsByCategory,
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    final list = response.data as List<dynamic>;
+    return list
+        .map(
+          (e) => CategoryTransactionGroupModel.fromJson(
+            e as Map<String, dynamic>,
+          ),
+        )
+        .toList();
   }
 }

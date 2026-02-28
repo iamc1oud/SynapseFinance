@@ -6,7 +6,10 @@ import 'package:intl/intl.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/category.dart';
+import '../../domain/entities/category_spending.dart';
+import '../../domain/entities/category_transaction_group.dart';
 import '../../domain/entities/tag.dart';
+import '../../domain/entities/transaction.dart';
 import '../../domain/repositories/ledger_repository.dart';
 import '../datasources/ledger_api_client.dart';
 
@@ -69,6 +72,62 @@ class LedgerRepositoryImpl implements LedgerRepository {
     try {
       final tags = await _apiClient.getTags();
       return Right(tags);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('$e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Transaction>>> getTransactions({
+    String? transactionType,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) async {
+    try {
+      final transactions = await _apiClient.getTransactions(
+        transactionType: transactionType,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+      );
+      return Right(transactions);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('$e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CategorySpending>>> getCategorySpending({
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) async {
+    try {
+      final spending = await _apiClient.getCategorySpending(
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+      );
+      return Right(spending);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('$e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CategoryTransactionGroup>>> getTransactionsByCategory({
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) async {
+    try {
+      final groups = await _apiClient.getTransactionsByCategory(
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+      );
+      return Right(groups);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {

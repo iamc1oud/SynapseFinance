@@ -4,11 +4,13 @@ from typing import Optional
 from accounts.auth import JWTAuth
 from accounts.schemas import ErrorResponse, MessageResponse
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Sum
 from ninja import Router
 
 from ..models import Account, Category, Tag, Transaction
 from ..schemas import (
+    CategorySpendingResponse,
+    CategoryTransactionGroupResponse,
     CreateExpenseRequest,
     CreateIncomeRequest,
     CreateTransferRequest,
@@ -182,6 +184,101 @@ def list_transactions(
         qs = qs.filter(date__lte=date_to)
 
     return 200, [TransactionResponse.from_transaction(t) for t in qs]
+
+
+@router.get(
+    "/spending-by-category",
+    response={200: list[CategorySpendingResponse]},
+    auth=JWTAuth(),
+    description=(
+        "Return total expense spending grouped by category, ordered highest to lowest. "
+        "Optionally filter by date range (date_from, date_to). "
+        "Only includes expense transactions."
+    ),
+)
+def spending_by_category(
+    request,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+):
+    qs = Transaction.objects.filter(
+        user=request.auth,
+        transaction_type='expense',
+    ).select_related('category')
+
+    if date_from:
+        qs = qs.filter(date__gte=date_from)
+    if date_to:
+        qs = qs.filter(date__lte=date_to)
+
+    rows = (
+        qs.values('category__id', 'category__name', 'category__icon')
+        .annotate(total=Sum('amount'))
+        .order_by('-total')
+    )
+
+    return 200, [
+        CategorySpendingResponse(
+            category_id=r['category__id'],
+            category_name=r['category__name'],
+            category_icon=r['category__icon'] or '',
+            total=r['total'],
+        )
+        for r in rows
+        if r['category__id'] is not None
+    ]
+
+
+@router.get(
+    "/by-category",
+    response={200: list[CategoryTransactionGroupResponse]},
+    auth=JWTAuth(),
+    description=(
+        "Return expense transactions grouped by category. "
+        "Each group contains the category name, icon, total amount, and all matching transactions. "
+        "Optionally filter by date range (date_from, date_to). "
+        "Groups are ordered by total spending descending."
+    ),
+)
+def transactions_by_category(
+    request,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+):
+    from collections import defaultdict
+
+    qs = Transaction.objects.filter(
+        user=request.auth,
+        transaction_type='expense',
+    ).select_related('account', 'to_account', 'category').prefetch_related('tags')
+
+    if date_from:
+        qs = qs.filter(date__gte=date_from)
+    if date_to:
+        qs = qs.filter(date__lte=date_to)
+
+    groups: dict = defaultdict(lambda: {'category': None, 'total': 0, 'transactions': []})
+
+    for txn in qs.order_by('-date', '-created_at'):
+        if txn.category is None:
+            continue
+        cid = txn.category.id
+        groups[cid]['category'] = txn.category
+        groups[cid]['total'] += txn.amount
+        groups[cid]['transactions'].append(txn)
+
+    sorted_groups = sorted(groups.values(), key=lambda g: g['total'], reverse=True)
+
+    return 200, [
+        CategoryTransactionGroupResponse(
+            category_id=g['category'].id,
+            category_name=g['category'].name,
+            category_icon=g['category'].icon or '',
+            total=g['total'],
+            transactions=[TransactionResponse.from_transaction(t) for t in g['transactions']],
+        )
+        for g in sorted_groups
+    ]
 
 
 @router.get(

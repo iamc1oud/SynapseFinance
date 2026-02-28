@@ -3,7 +3,10 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../entities/account.dart';
 import '../entities/category.dart';
+import '../entities/category_spending.dart';
+import '../entities/category_transaction_group.dart';
 import '../entities/tag.dart';
+import '../entities/transaction.dart';
 
 abstract class LedgerRepository {
   Future<Either<Failure, List<Account>>> getAccounts();
@@ -14,6 +17,22 @@ abstract class LedgerRepository {
     required String categoryType,
   });
   Future<Either<Failure, List<Tag>>> getTags();
+
+  Future<Either<Failure, List<Transaction>>> getTransactions({
+    String? transactionType,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  });
+
+  Future<Either<Failure, List<CategorySpending>>> getCategorySpending({
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  });
+
+  Future<Either<Failure, List<CategoryTransactionGroup>>> getTransactionsByCategory({
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  });
 
   Future<Either<Failure, void>> createExpense({
     required double amount,
