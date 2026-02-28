@@ -8,6 +8,7 @@ import 'package:synapse_finance/features/auth/domain/usecases/check_auth_status_
 import 'package:synapse_finance/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:synapse_finance/features/auth/domain/usecases/login_usecase.dart';
 import 'package:synapse_finance/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:synapse_finance/core/network/auth_event_bus.dart';
 import 'package:synapse_finance/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:synapse_finance/features/auth/presentation/bloc/auth_state.dart';
 
@@ -46,6 +47,7 @@ void main() {
       mockLogoutUseCase,
       mockGetCurrentUserUseCase,
       mockCheckAuthStatusUseCase,
+      AuthEventBus(),
     );
   });
 

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/network/auth_event_bus.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/usecases/check_auth_status_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
@@ -14,13 +17,29 @@ class AuthCubit extends Cubit<AuthState> {
   final LogoutUseCase _logoutUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final CheckAuthStatusUseCase _checkAuthStatusUseCase;
+  final AuthEventBus _authEventBus;
+
+  late final StreamSubscription<AuthEvent> _eventSubscription;
 
   AuthCubit(
     this._loginUseCase,
     this._logoutUseCase,
     this._getCurrentUserUseCase,
     this._checkAuthStatusUseCase,
-  ) : super(const AuthState.initial());
+    this._authEventBus,
+  ) : super(const AuthState.initial()) {
+    _eventSubscription = _authEventBus.stream.listen((event) {
+      if (event == AuthEvent.sessionExpired) {
+        emit(const AuthState.unauthenticated());
+      }
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _eventSubscription.cancel();
+    return super.close();
+  }
 
   Future<void> checkAuthStatus() async {
     emit(const AuthState.loading());

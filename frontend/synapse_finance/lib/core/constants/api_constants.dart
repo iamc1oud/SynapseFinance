@@ -7,7 +7,7 @@ class ApiConstants {
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String logout = '/auth/logout';
-  static const String refreshToken = '/auth/token/refresh';
+  static const String refreshToken = '/auth/refresh';
   static const String user = '/auth/user';
 
   // Ledger endpoints

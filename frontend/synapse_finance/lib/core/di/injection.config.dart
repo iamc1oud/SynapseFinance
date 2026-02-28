@@ -51,6 +51,7 @@ import '../../features/ledger/presentation/bloc/add_transaction_cubit.dart'
     as _i629;
 import '../../features/ledger/presentation/bloc/add_transfer_cubit.dart'
     as _i630;
+import '../network/auth_event_bus.dart' as _i100;
 import '../network/auth_interceptor.dart' as _i908;
 import '../network/dio_client.dart' as _i667;
 import '../network/logging_interceptor.dart' as _i551;
@@ -77,6 +78,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i964.TokenStorage>(
       () => _i964.TokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
+    gh.lazySingleton<_i100.AuthEventBus>(() => _i100.AuthEventBus());
     gh.lazySingleton<_i551.LoggingInterceptor>(
       () => _i551.LoggingInterceptor(gh<_i974.Logger>()),
     );
@@ -87,7 +89,7 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.lazySingleton<_i908.AuthInterceptor>(
-      () => _i908.AuthInterceptor(gh<_i964.TokenStorage>()),
+      () => _i908.AuthInterceptor(gh<_i964.TokenStorage>(), gh<_i100.AuthEventBus>()),
     );
     gh.lazySingleton<_i361.Dio>(
       () => dioModule.dio(
@@ -126,6 +128,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i48.LogoutUseCase>(),
         gh<_i17.GetCurrentUserUseCase>(),
         gh<_i52.CheckAuthStatusUseCase>(),
+        gh<_i100.AuthEventBus>(),
       ),
     );
     gh.factory<_i281.LoginCubit>(

@@ -82,7 +82,7 @@ class _LoginViewState extends State<_LoginView> {
                   const SizedBox(height: 48),
                   AuthTextField(
                     label: 'Email Address',
-                    hint: 'name@example.com',
+                    hint: 'Enter your email',
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
