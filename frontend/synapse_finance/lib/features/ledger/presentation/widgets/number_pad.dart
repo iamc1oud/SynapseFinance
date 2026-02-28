@@ -14,12 +14,19 @@ class NumberPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 2.2,
-      children: [
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double maxButtonHeight = 60.0;
+        final double buttonWidth = constraints.maxWidth / 3;
+        final double buttonHeight =
+            (buttonWidth / 2.2).clamp(0.0, maxButtonHeight);
+        final double aspectRatio = buttonWidth / buttonHeight;
+        return GridView.count(
+          crossAxisCount: 3,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: aspectRatio,
+          children: [
         _PadButton(label: '1', onTap: () => onDigit('1')),
         _PadButton(label: '2', onTap: () => onDigit('2')),
         _PadButton(label: '3', onTap: () => onDigit('3')),
@@ -31,8 +38,10 @@ class NumberPad extends StatelessWidget {
         _PadButton(label: '9', onTap: () => onDigit('9')),
         _PadButton(label: '.', onTap: () => onDigit('.')),
         _PadButton(label: '0', onTap: () => onDigit('0')),
-        _DeleteButton(onTap: onDelete),
-      ],
+            _DeleteButton(onTap: onDelete),
+          ],
+        );
+      },
     );
   }
 }

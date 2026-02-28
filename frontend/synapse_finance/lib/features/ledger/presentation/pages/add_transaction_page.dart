@@ -159,140 +159,202 @@ class _AddTransactionPageState extends State<AddTransactionPage>
             ],
           ),
           resizeToAvoidBottomInset: false,
-          body: Column(
+          body: _buildBody(context, state, cubit, c),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    AddTransactionState state,
+    AddTransactionCubit cubit,
+    AppColorScheme c,
+  ) {
+    final typeToggle = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: TransactionTypeToggle(
+        selected: state.transactionType,
+        onTypeSelected: cubit.switchType,
+        onTransferTap: () => context.push('/add-transfer'),
+      ),
+    );
+
+    final amountDisplay = _AmountDisplay(amount: state.displayAmount);
+
+    final categorySection = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: TransactionTypeToggle(
-                  selected: state.transactionType,
-                  onTypeSelected: cubit.switchType,
-                  onTransferTap: () => context.push('/add-transfer'),
+              Text(
+                'CATEGORY',
+                style: TextStyle(
+                  fontSize: 11,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w600,
+                  color: c.textSecondary,
                 ),
               ),
-              _AmountDisplay(amount: state.displayAmount),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'CATEGORY',
-                      style: TextStyle(
-                        fontSize: 11,
-                        letterSpacing: 1.2,
-                        fontWeight: FontWeight.w600,
-                        color: c.textSecondary,
-                      ),
-                    ),
-                    if (state.categories.isNotEmpty)
-                      TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          'View All',
-                          style: TextStyle(color: c.primary, fontSize: 13),
-                        ),
-                      ),
-                  ],
+              if (state.categories.isNotEmpty)
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    'View All',
+                    style: TextStyle(color: c.primary, fontSize: 13),
+                  ),
                 ),
-              ),
-              if (state.status == AddTransactionStatus.loading)
-                SizedBox(
-                  height: 90,
-                  child: Center(
-                    child: CircularProgressIndicator(color: c.primary),
+            ],
+          ),
+        ),
+        if (state.status == AddTransactionStatus.loading)
+          SizedBox(
+            height: 90,
+            child: Center(child: CircularProgressIndicator(color: c.primary)),
+          )
+        else
+          CategorySelector(
+            categories: state.categories,
+            selected: state.selectedCategory,
+            onSelected: cubit.selectCategory,
+          ),
+      ],
+    );
+
+    final detailsSection = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          _InfoRow(
+            icon: Icons.calendar_today_outlined,
+            label: 'DATE',
+            value: DateFormat('EEEE, MMM d, yyyy').format(state.selectedDate),
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: state.selectedDate,
+                firstDate: DateTime(2020),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (date != null) cubit.selectDate(date);
+            },
+          ),
+          const SizedBox(height: 8),
+          _NoteRow(controller: _noteController, onChanged: cubit.updateNote),
+        ],
+      ),
+    );
+
+    final numPad = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: NumberPad(onDigit: cubit.inputDigit, onDelete: cubit.deleteDigit),
+    );
+
+    final saveButton = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton.icon(
+          onPressed:
+              state.status == AddTransactionStatus.saving ? null : cubit.save,
+          icon: state.status == AddTransactionStatus.saving
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: c.background,
                   ),
                 )
-              else
-                CategorySelector(
-                  categories: state.categories,
-                  selected: state.selectedCategory,
-                  onSelected: cubit.selectCategory,
-                ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    _InfoRow(
-                      icon: Icons.calendar_today_outlined,
-                      label: 'DATE',
-                      value: DateFormat(
-                        'EEEE, MMM d, yyyy',
-                      ).format(state.selectedDate),
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: state.selectedDate,
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime.now().add(
-                            const Duration(days: 365),
-                          ),
-                        );
-                        if (date != null) cubit.selectDate(date);
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    _NoteRow(
-                      controller: _noteController,
-                      onChanged: cubit.updateNote,
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: NumberPad(
-                  onDigit: cubit.inputDigit,
-                  onDelete: cubit.deleteDigit,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton.icon(
-                    onPressed: state.status == AddTransactionStatus.saving
-                        ? null
-                        : cubit.save,
-                    icon: state.status == AddTransactionStatus.saving
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: c.background,
-                            ),
-                          )
-                        : Icon(Icons.check_circle, color: c.background),
-                    label: Text(
-                      'Save Transaction',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: c.background,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: c.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
+              : Icon(Icons.check_circle, color: c.background),
+          label: Text(
+            'Save Transaction',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: c.background,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: c.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        // Tablet / large screen: side-by-side layout
+        if (constraints.maxWidth >= 700) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Left: scrollable form content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      typeToggle,
+                      amountDisplay,
+                      categorySection,
+                      const SizedBox(height: 8),
+                      detailsSection,
+                      const SizedBox(height: 24),
+                    ],
                   ),
+                ),
+              ),
+              VerticalDivider(width: 1, thickness: 1, color: c.border),
+              // Right: fixed-width numpad + save button
+              SizedBox(
+                width: 360,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Spacer(),
+                    numPad,
+                    saveButton,
+                  ],
                 ),
               ),
             ],
-          ),
+          );
+        }
+
+        // Phone / portrait layout — top content scrollable, numpad pinned at bottom
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    typeToggle,
+                    amountDisplay,
+                    categorySection,
+                    const SizedBox(height: 8),
+                    detailsSection,
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+            ),
+            numPad,
+            saveButton,
+          ],
         );
       },
     );
