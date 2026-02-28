@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
@@ -43,6 +44,16 @@ class HomePage extends StatelessWidget {
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/add-transaction'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.background,
+        icon: const Icon(Icons.add),
+        label: const Text(
+          'Add Transaction',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
     );

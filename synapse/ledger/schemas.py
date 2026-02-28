@@ -11,7 +11,7 @@ class CreateAccountRequest(Schema):
     """Create a new financial account (e.g. Checking, Savings)."""
     name: str
     account_type: str  # checking, savings, credit, cash, investment
-    balance: Decimal = Decimal("0.00")
+    balance: Decimal = Decimal(0.00)
     currency: str = "USD"
     icon: str = ""
 

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/ledger/presentation/bloc/add_transaction_cubit.dart';
+import '../../features/ledger/presentation/bloc/add_transfer_cubit.dart';
+import '../../features/ledger/presentation/pages/add_transaction_page.dart';
+import '../../features/ledger/presentation/pages/add_transfer_page.dart';
+import '../di/injection.dart';
 
 class AppRouter {
   final AuthCubit authCubit;
@@ -33,6 +39,20 @@ class AppRouter {
     routes: [
       GoRoute(path: '/', builder: (context, state) => const HomePage()),
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(
+        path: '/add-transaction',
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<AddTransactionCubit>(),
+          child: const AddTransactionPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/add-transfer',
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<AddTransferCubit>(),
+          child: const AddTransferPage(),
+        ),
+      ),
     ],
   );
 }
