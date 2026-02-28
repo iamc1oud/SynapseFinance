@@ -104,8 +104,9 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
             centerTitle: true,
             actions: [
               TextButton(
-                onPressed:
-                    state.status == CreateCategoryStatus.saving ? null : cubit.save,
+                onPressed: state.status == CreateCategoryStatus.saving
+                    ? null
+                    : cubit.save,
                 child: state.status == CreateCategoryStatus.saving
                     ? const SizedBox(
                         width: 18,
@@ -203,10 +204,7 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
 
 IconData _iconDataFor(String key) {
   return _iconOptions
-      .firstWhere(
-        (e) => e.$1 == key,
-        orElse: () => _iconOptions.last,
-      )
+      .firstWhere((e) => e.$1 == key, orElse: () => _iconOptions.last)
       .$2;
 }
 
@@ -289,7 +287,9 @@ class _ToggleOption extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? AppColors.background : AppColors.textSecondary,
+              color: isSelected
+                  ? AppColors.background
+                  : AppColors.textSecondary,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               fontSize: 14,
             ),
@@ -323,10 +323,7 @@ class _IconPreview extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 13,
-          ),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
         ),
       ],
     );
@@ -365,7 +362,9 @@ class _IconGrid extends StatelessWidget {
                 height: 52,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected ? AppColors.primary : AppColors.surfaceLight,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.surfaceLight,
                   border: isSelected
                       ? null
                       : Border.all(color: AppColors.border, width: 1),
@@ -384,8 +383,7 @@ class _IconGrid extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   color: isSelected ? AppColors.primary : AppColors.textHint,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

@@ -6,6 +6,7 @@ import '../../features/auth/presentation/bloc/auth_cubit.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/ledger/domain/usecases/create_category_usecase.dart';
 import '../../features/ledger/presentation/bloc/add_transaction_cubit.dart';
 import '../../features/ledger/presentation/bloc/add_transfer_cubit.dart';
 import '../../features/ledger/presentation/bloc/create_category_cubit.dart';
@@ -58,7 +59,7 @@ class AppRouter {
       GoRoute(
         path: '/create-category',
         builder: (context, state) => BlocProvider(
-          create: (_) => getIt<CreateCategoryCubit>(),
+          create: (_) => CreateCategoryCubit(getIt<CreateCategoryUseCase>()),
           child: const CreateCategoryPage(),
         ),
       ),

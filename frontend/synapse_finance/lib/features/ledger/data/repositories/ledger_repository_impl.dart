@@ -164,11 +164,34 @@ class LedgerRepositoryImpl implements LedgerRepository {
         return const NetworkFailure('No internet connection.');
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
-        final detail =
-            e.response?.data?['detail'] as String? ?? 'Something went wrong';
+        final detail = _extractErrorMessage(e.response?.data);
         return ServerFailure(detail, statusCode: statusCode);
       default:
         return ServerFailure('${e.message}');
     }
+  }
+
+  /// Handles the two error shapes Django Ninja can return:
+  ///   • Map  → {"detail": "message"}
+  ///   • List → [{"loc": [...], "msg": "...", "type": "..."}]  (422 validation)
+  String _extractErrorMessage(dynamic data) {
+    if (data == null) return 'Something went wrong';
+    if (data is String) return data.isNotEmpty ? data : 'Something went wrong';
+    if (data is Map<String, dynamic>) {
+      final detail = data['detail'];
+      if (detail is String) return detail;
+      if (detail is List && detail.isNotEmpty) {
+        final first = detail.first;
+        if (first is Map) return first['msg'] as String? ?? 'Something went wrong';
+      }
+      return 'Something went wrong';
+    }
+    if (data is List && data.isNotEmpty) {
+      // Django Ninja 422 validation format
+      final first = data.first;
+      if (first is Map) return first['msg'] as String? ?? 'Validation error';
+      return 'Validation error';
+    }
+    return 'Something went wrong';
   }
 }

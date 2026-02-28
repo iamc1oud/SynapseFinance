@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -5,22 +7,199 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+
+  static const _tabs = [
+    _AssistantTab(),
+    _InsightsTab(),
+    _CategoriesTab(),
+    _SettingsTab(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AI Expense Manager'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => context.read<AuthCubit>().logout(),
-          ),
-        ],
+      extendBody: true, // content flows under the translucent nav bar
+      backgroundColor: AppColors.background,
+      body: IndexedStack(index: _currentIndex, children: _tabs),
+      floatingActionButton: _currentIndex != 3
+          ? FloatingActionButton(
+              onPressed: () => context.push('/add-transaction'),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.background,
+              child: const Icon(Icons.add),
+            )
+          : null,
+      bottomNavigationBar: _FrostedNavBar(
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
       ),
-      body: const Center(
+    );
+  }
+}
+
+// ─── Frosted glass nav bar ─────────────────────────────────────────────────────
+
+class _FrostedNavBar extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  const _FrostedNavBar({required this.currentIndex, required this.onTap});
+
+  static const _items = [
+    (Icons.chat_bubble_outline_rounded, 'Assistant'),
+    (Icons.bar_chart_rounded, 'Insights'),
+    (Icons.category_outlined, 'Categories'),
+    (Icons.settings_outlined, 'Settings'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF122112).withValues(alpha: 0.72),
+            border: Border(
+              top: BorderSide(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                width: 0.5,
+              ),
+            ),
+          ),
+          padding: EdgeInsets.only(
+            top: 10,
+            left: 8,
+            right: 8,
+            bottom: bottomInset > 0 ? bottomInset : 12,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(_items.length, (i) {
+              final (icon, label) = _items[i];
+              return _NavItem(
+                icon: icon,
+                label: label,
+                isSelected: currentIndex == i,
+                onTap: () => onTap(i),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              width: 40,
+              height: 32,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: isSelected
+                    ? AppColors.primary.withValues(alpha: 0.18)
+                    : Colors.transparent,
+              ),
+              child: Icon(
+                icon,
+                size: 22,
+                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 3),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              ),
+              child: Text(label),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Tab content ───────────────────────────────────────────────────────────────
+
+class _AssistantTab extends StatelessWidget {
+  const _AssistantTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.auto_awesome, size: 56, color: AppColors.primary),
+            SizedBox(height: 16),
+            Text(
+              'AI Assistant',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Chat to log expenses or get insights',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InsightsTab extends StatelessWidget {
+  const _InsightsTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SafeArea(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -46,11 +225,88 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/add-transaction'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.background,
-        child: const Icon(Icons.add),
+    );
+  }
+}
+
+class _CategoriesTab extends StatelessWidget {
+  const _CategoriesTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.category, size: 56, color: AppColors.primary),
+            const SizedBox(height: 16),
+            const Text(
+              'Manage Categories',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Organise your spending by category',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 32),
+            TextButton.icon(
+              onPressed: () => context.push('/create-category'),
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text('New Category'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                textStyle: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsTab extends StatelessWidget {
+  const _SettingsTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.settings, size: 56, color: AppColors.primary),
+            const SizedBox(height: 16),
+            const Text(
+              'Settings',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 32),
+            OutlinedButton.icon(
+              onPressed: () => context.read<AuthCubit>().logout(),
+              icon: const Icon(Icons.logout),
+              label: const Text('Log Out'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.error,
+                side: const BorderSide(color: AppColors.error),
+                minimumSize: const Size(180, 48),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

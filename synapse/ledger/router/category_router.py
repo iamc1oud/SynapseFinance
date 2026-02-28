@@ -10,7 +10,7 @@ router = Router(tags=["Categories"])
 
 
 @router.post(
-    "/",
+    "",
     response={201: CategoryResponse},
     auth=JWTAuth(),
     description="Create a new transaction category (e.g. Food, Transport, Salary).",
@@ -26,7 +26,7 @@ def create_category(request, payload: CreateCategoryRequest):
 
 
 @router.get(
-    "/",
+    "",
     response={200: list[CategoryResponse]},
     auth=JWTAuth(),
     description="List transaction categories. Optionally filter by type: 'expense' or 'income'.",

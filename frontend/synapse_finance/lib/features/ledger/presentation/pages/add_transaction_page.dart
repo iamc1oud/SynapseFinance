@@ -92,6 +92,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               ),
             ],
           ),
+          resizeToAvoidBottomInset: false,
           body: Column(
             children: [
               // Transaction type toggle
