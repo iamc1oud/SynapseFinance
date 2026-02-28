@@ -174,6 +174,11 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
     );
   }
 
+  Future<void> reset() async {
+    emit(AddTransactionState(selectedDate: DateTime.now()));
+    await loadData();
+  }
+
   String _typeString(TransactionType type) =>
       type == TransactionType.expense ? 'expense' : 'income';
 }
