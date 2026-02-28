@@ -8,6 +8,11 @@ import '../entities/tag.dart';
 abstract class LedgerRepository {
   Future<Either<Failure, List<Account>>> getAccounts();
   Future<Either<Failure, List<Category>>> getCategories({String? categoryType});
+  Future<Either<Failure, Category>> createCategory({
+    required String name,
+    required String icon,
+    required String categoryType,
+  });
   Future<Either<Failure, List<Tag>>> getTags();
 
   Future<Either<Failure, void>> createExpense({

@@ -46,15 +46,11 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/add-transaction'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.background,
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Add Transaction',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        child: const Icon(Icons.add),
       ),
     );
   }

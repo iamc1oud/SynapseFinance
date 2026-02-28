@@ -8,8 +8,10 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/ledger/presentation/bloc/add_transaction_cubit.dart';
 import '../../features/ledger/presentation/bloc/add_transfer_cubit.dart';
+import '../../features/ledger/presentation/bloc/create_category_cubit.dart';
 import '../../features/ledger/presentation/pages/add_transaction_page.dart';
 import '../../features/ledger/presentation/pages/add_transfer_page.dart';
+import '../../features/ledger/presentation/pages/create_category_page.dart';
 import '../di/injection.dart';
 
 class AppRouter {
@@ -51,6 +53,13 @@ class AppRouter {
         builder: (context, state) => BlocProvider(
           create: (_) => getIt<AddTransferCubit>(),
           child: const AddTransferPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/create-category',
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<CreateCategoryCubit>(),
+          child: const CreateCategoryPage(),
         ),
       ),
     ],

@@ -45,6 +45,26 @@ class LedgerRepositoryImpl implements LedgerRepository {
   }
 
   @override
+  Future<Either<Failure, Category>> createCategory({
+    required String name,
+    required String icon,
+    required String categoryType,
+  }) async {
+    try {
+      final category = await _apiClient.createCategory(
+        name: name,
+        icon: icon,
+        categoryType: categoryType,
+      );
+      return Right(category);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('$e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<Tag>>> getTags() async {
     try {
       final tags = await _apiClient.getTags();

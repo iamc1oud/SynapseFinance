@@ -27,6 +27,18 @@ class LedgerApiClient {
     return list.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  Future<CategoryModel> createCategory({
+    required String name,
+    required String icon,
+    required String categoryType,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      ApiConstants.categories,
+      data: {'name': name, 'icon': icon, 'category_type': categoryType},
+    );
+    return CategoryModel.fromJson(response.data!);
+  }
+
   Future<List<TagModel>> getTags() async {
     final response = await _dio.get(ApiConstants.tags);
     final list = response.data as List<dynamic>;
