@@ -93,7 +93,7 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'synapse'),
         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        'ATOMIC_REQUESTS': True, # SET LOCAL only works for transaction.
+        # 'ATOMIC_REQUESTS': True, # SET LOCAL only works for transaction.
     },
     # Superuser connection for migrations (bypasses RLS).
     # Usage: python manage.py migrate --database=superuser
