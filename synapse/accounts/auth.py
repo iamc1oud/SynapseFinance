@@ -32,12 +32,12 @@ def create_access_token(user_id: int) -> str:
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-def create_refresh_token(user: User) -> str:
+async def create_refresh_token(user: User) -> str:
     """Create a new refresh token and store it in the database."""
     token = secrets.token_urlsafe(32)
     expires_at = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
-    RefreshToken.objects.create(
+    await RefreshToken.objects.acreate(
         user=user,
         token=token,
         expires_at=expires_at,
@@ -46,10 +46,10 @@ def create_refresh_token(user: User) -> str:
     return token
 
 
-def create_tokens(user: User) -> tuple[str, str]:
+async def create_tokens(user: User) -> tuple[str, str]:
     """Create both access and refresh tokens for a user."""
     access_token = create_access_token(user.pk)
-    refresh_token = create_refresh_token(user)
+    refresh_token = await create_refresh_token(user)
     return access_token, refresh_token
 
 

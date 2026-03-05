@@ -1,4 +1,4 @@
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -56,7 +56,7 @@ def register(request, payload: RegisterRequest):
     with transaction.atomic(), rls_context(user.pk):
         user_main_currency = SubCurrency.objects.create(currency=settings.DEFAULT_CURRENCY, user=user)
         AppPreference.objects.create(user=user, main_currency=user_main_currency)
-        access_token, refresh_token = create_tokens(user)
+        access_token, refresh_token = async_to_sync(create_tokens)(user)
 
     return 201, AuthResponse(
         user=UserResponse.from_user(user),
@@ -65,21 +65,20 @@ def register(request, payload: RegisterRequest):
 
 
 @router.post("/login", response={200: AuthResponse, 401: ErrorResponse})
-def login(request, payload: LoginRequest):
+async def login(request, payload: LoginRequest):
     """Authenticate user and return tokens."""
     try:
-        user = User.objects.get(email__iexact=payload.email)
+        user = await User.objects.aget(email__iexact=payload.email)
     except User.DoesNotExist:
         return 401, ErrorResponse(detail="Invalid email or password")
 
-    if not user.check_password(payload.password):
+    if not await sync_to_async(user.check_password)(payload.password):
         return 401, ErrorResponse(detail="Invalid email or password")
 
     if not user.is_active:
         return 401, ErrorResponse(detail="Account is disabled")
 
-    with transaction.atomic(), rls_context(user.pk):
-        access_token, refresh_token = create_tokens(user)
+    access_token, refresh_token = await create_tokens(user)
 
     return 200, AuthResponse(
         user=UserResponse.from_user(user),
@@ -88,7 +87,7 @@ def login(request, payload: LoginRequest):
 
 
 @router.post("/refresh", response={200: TokenResponse, 401: ErrorResponse})
-def refresh(request, payload: RefreshTokenRequest):
+async def refresh(request, payload: RefreshTokenRequest):
     """Get new access and refresh tokens using a valid refresh token."""
     try:
         # Verify first to get the user for RLS context, then do the
@@ -96,7 +95,7 @@ def refresh(request, payload: RefreshTokenRequest):
         user = verify_refresh_token(payload.refresh_token)
 
         revoke_refresh_token(payload.refresh_token)
-        access_token, new_refresh_token = create_tokens(user)
+        access_token, new_refresh_token = await create_tokens(user)
         return 200, TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
     except AuthenticationError as e:
         return 401, ErrorResponse(detail=str(e))

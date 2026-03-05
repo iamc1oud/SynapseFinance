@@ -20,4 +20,4 @@ EXPOSE 8000
 # Run with hot reload enabled
 # CMD ["uv", "run", "python", "synapse/manage.py", "runserver", "0.0.0.0:8000"]
 
-CMD ["uv", "run", "uvicorn", "synapse.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--app-dir", "synapse"]
+CMD ["uv", "run", "uvicorn", "synapse.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--app-dir", "synapse", "--reload"]

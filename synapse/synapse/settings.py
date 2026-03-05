@@ -95,7 +95,7 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'synapse'),
         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        'CONN_MAX_AGE': 600,  # reuse connections for 10 minutes
+        'CONN_MAX_AGE': 0,  # let PgBouncer handle connection pooling
         # 'ATOMIC_REQUESTS': True, # SET LOCAL only works for transaction.
     },
     # Superuser connection for migrations (bypasses RLS).

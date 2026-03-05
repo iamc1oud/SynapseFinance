@@ -17,6 +17,22 @@ services:
       timeout: 5s
       retries: 5
 
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.25.1-p0
+    volumes:
+      - ./docker/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini
+      - ./docker/userlist.txt:/etc/pgbouncer/userlist.txt
+    ports:
+      - "6432:6432"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432 -U synapse_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     container_name: moneymanager-api
@@ -29,12 +45,12 @@ services:
       POSTGRES_DB: synapse
       POSTGRES_USER: synapse_app
       POSTGRES_PASSWORD: synapse
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
+      POSTGRES_HOST: pgbouncer
+      POSTGRES_PORT: 6432
       POSTGRES_SUPERUSER: synapse
       POSTGRES_SUPERUSER_PASSWORD: synapse
     depends_on:
-      db:
+      pgbouncer:
         condition: service_healthy
 
 volumes:
