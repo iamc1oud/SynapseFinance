@@ -93,9 +93,9 @@ def refresh(request, payload: RefreshTokenRequest):
         # Verify first to get the user for RLS context, then do the
         # revoke + create inside the RLS-scoped transaction.
         user = verify_refresh_token(payload.refresh_token)
-        with transaction.atomic(), rls_context(user.pk):
-            revoke_refresh_token(payload.refresh_token)
-            access_token, new_refresh_token = create_tokens(user)
+
+        revoke_refresh_token(payload.refresh_token)
+        access_token, new_refresh_token = create_tokens(user)
         return 200, TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
     except AuthenticationError as e:
         return 401, ErrorResponse(detail=str(e))

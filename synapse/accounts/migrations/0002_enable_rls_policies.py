@@ -4,7 +4,6 @@ from django.db import connection, migrations
 
 # Tables that have a user_id column and need RLS
 RLS_TABLES = [
-    'refresh_tokens',
     'sub_currencies',
     'user_preferences',
 ]
