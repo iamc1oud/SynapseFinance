@@ -16,5 +16,6 @@ api.add_router("/auth", auth_router.router)
 api.add_router("/ledger", ledger_router.router)
 
 urlpatterns = [
+    path('orbit/', include('orbit.urls')),
     path("api/", api.urls)
 ]

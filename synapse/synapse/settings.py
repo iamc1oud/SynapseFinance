@@ -43,6 +43,7 @@ PLUGINS = [
 ]
 
 INSTALLED_APPS = [
+    'orbit',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
 ] + CORE_APPS
 
 MIDDLEWARE = [
+    'orbit.middleware.OrbitMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -93,6 +95,7 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'synapse'),
         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'CONN_MAX_AGE': 600,  # reuse connections for 10 minutes
         # 'ATOMIC_REQUESTS': True, # SET LOCAL only works for transaction.
     },
     # Superuser connection for migrations (bypasses RLS).
