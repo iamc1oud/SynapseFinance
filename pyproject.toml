@@ -15,6 +15,7 @@ dependencies = [
     "pytz>=2025.2",
     "django-orbit>=0.6.3",
     "uvicorn>=0.41.0",
+    "django-redis>=5.4.0",
 ]
 
 [dependency-groups]

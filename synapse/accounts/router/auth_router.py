@@ -16,6 +16,7 @@ from ..auth import (
     revoke_refresh_token,
     verify_refresh_token,
 )
+from ..cache import check_password_cached
 from ..models import User, AppPreference
 from ..schemas import (
     AuthResponse,
@@ -72,7 +73,7 @@ async def login(request, payload: LoginRequest):
     except User.DoesNotExist:
         return 401, ErrorResponse(detail="Invalid email or password")
 
-    if not await sync_to_async(user.check_password)(payload.password):
+    if not await check_password_cached(user, payload.password):
         return 401, ErrorResponse(detail="Invalid email or password")
 
     if not user.is_active:

@@ -33,6 +33,16 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     container_name: moneymanager-api
@@ -49,8 +59,11 @@ services:
       POSTGRES_PORT: 6432
       POSTGRES_SUPERUSER: synapse
       POSTGRES_SUPERUSER_PASSWORD: synapse
+      REDIS_URL: "redis://redis:6379/0"
     depends_on:
       pgbouncer:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
 volumes:

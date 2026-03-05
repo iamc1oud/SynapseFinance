@@ -43,7 +43,6 @@ PLUGINS = [
 ]
 
 INSTALLED_APPS = [
-    'orbit',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,7 +52,6 @@ INSTALLED_APPS = [
 ] + CORE_APPS
 
 MIDDLEWARE = [
-    'orbit.middleware.OrbitMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -109,6 +107,19 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     },
 }
+
+# Cache configuration
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL", "redis://localhost:6379/0"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+PASSWORD_CACHE_TTL = int(os.getenv("PASSWORD_CACHE_TTL", "300"))  # 5 minutes
 
 
 # Password validation
