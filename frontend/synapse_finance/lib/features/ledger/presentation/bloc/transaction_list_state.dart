@@ -6,9 +6,12 @@ enum TransactionListStatus { initial, loading, loaded, error }
 
 enum ViewMode { week, month }
 
+enum TransactionTypeFilter { expense, income }
+
 class TransactionListState extends Equatable {
   final TransactionListStatus status;
   final ViewMode viewMode;
+  final TransactionTypeFilter transactionTypeFilter;
   final DateTime selectedDate;       // Specific day (week mode) or 1st of month (month mode)
   final DateTime currentWeekStart;   // Monday of the displayed week
   final List<CategoryTransactionGroup> categoryGroups;
@@ -20,6 +23,7 @@ class TransactionListState extends Equatable {
   const TransactionListState({
     required this.status,
     required this.viewMode,
+    required this.transactionTypeFilter,
     required this.selectedDate,
     required this.currentWeekStart,
     required this.categoryGroups,
@@ -36,6 +40,7 @@ class TransactionListState extends Equatable {
     return TransactionListState(
       status: TransactionListStatus.initial,
       viewMode: ViewMode.week,
+      transactionTypeFilter: TransactionTypeFilter.expense,
       selectedDate: today,
       currentWeekStart: monday,
       categoryGroups: const [],
@@ -58,6 +63,8 @@ class TransactionListState extends Equatable {
     return nextMonth.subtract(const Duration(days: 1));
   }
 
+  bool get isExpense => transactionTypeFilter == TransactionTypeFilter.expense;
+
   double get totalSpending =>
       categoryGroups.fold(0.0, (sum, g) => sum + g.total);
 
@@ -77,6 +84,7 @@ class TransactionListState extends Equatable {
   TransactionListState copyWith({
     TransactionListStatus? status,
     ViewMode? viewMode,
+    TransactionTypeFilter? transactionTypeFilter,
     DateTime? selectedDate,
     DateTime? currentWeekStart,
     List<CategoryTransactionGroup>? categoryGroups,
@@ -89,6 +97,7 @@ class TransactionListState extends Equatable {
     return TransactionListState(
       status: status ?? this.status,
       viewMode: viewMode ?? this.viewMode,
+      transactionTypeFilter: transactionTypeFilter ?? this.transactionTypeFilter,
       selectedDate: selectedDate ?? this.selectedDate,
       currentWeekStart: currentWeekStart ?? this.currentWeekStart,
       categoryGroups: categoryGroups ?? this.categoryGroups,
@@ -101,7 +110,8 @@ class TransactionListState extends Equatable {
 
   @override
   List<Object?> get props => [
-    status, viewMode, selectedDate, currentWeekStart, categoryGroups,
-    expandedCategoryIds, searchQuery, aiSuggestionDismissed, errorMessage,
+    status, viewMode, transactionTypeFilter, selectedDate, currentWeekStart,
+    categoryGroups, expandedCategoryIds, searchQuery, aiSuggestionDismissed,
+    errorMessage,
   ];
 }

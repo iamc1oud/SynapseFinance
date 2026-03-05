@@ -25,11 +25,13 @@ abstract class LedgerRepository {
   });
 
   Future<Either<Failure, List<CategorySpending>>> getCategorySpending({
+    String transactionType = 'expense',
     DateTime? dateFrom,
     DateTime? dateTo,
   });
 
   Future<Either<Failure, List<CategoryTransactionGroup>>> getTransactionsByCategory({
+    String transactionType = 'expense',
     DateTime? dateFrom,
     DateTime? dateTo,
   });

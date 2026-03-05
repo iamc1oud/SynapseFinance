@@ -127,9 +127,12 @@ class _TransactionListPageState extends State<TransactionListPage> {
             if (state.viewMode == ViewMode.week)
               SliverToBoxAdapter(child: _buildWeekStrip(state, cubit, c)),
             SliverToBoxAdapter(
+              child: _buildTransactionTypeToggle(state, cubit, c),
+            ),
+            SliverToBoxAdapter(
               child: Divider(color: c.border, height: 1),
             ),
-            SliverToBoxAdapter(child: _buildSearchBar(cubit, c)),
+            SliverToBoxAdapter(child: _buildSearchBar(state, cubit, c)),
             SliverToBoxAdapter(child: _buildSpendingTotal(state, c)),
             if (!state.aiSuggestionDismissed)
               SliverToBoxAdapter(child: _buildAiCard(state, cubit)),
@@ -142,7 +145,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
             else if (state.status == TransactionListStatus.error)
               SliverFillRemaining(child: _ErrorState(state.errorMessage, cubit))
             else ...[
-              const SliverToBoxAdapter(child: _SectionHeader()),
+              SliverToBoxAdapter(child: _SectionHeader(isExpense: state.isExpense)),
               if (state.filteredGroups.isEmpty)
                 const SliverFillRemaining(child: _EmptyState())
               else
@@ -325,7 +328,51 @@ class _TransactionListPageState extends State<TransactionListPage> {
     );
   }
 
-  Widget _buildSearchBar(TransactionListCubit cubit, AppColorScheme c) {
+  Widget _buildTransactionTypeToggle(
+    TransactionListState state,
+    TransactionListCubit cubit,
+    AppColorScheme c,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _TransactionTypeBtn(
+                label: 'Expenses',
+                selected: state.isExpense,
+                onTap: () => cubit.setTransactionTypeFilter(
+                  TransactionTypeFilter.expense,
+                ),
+              ),
+            ),
+            Expanded(
+              child: _TransactionTypeBtn(
+                label: 'Income',
+                selected: !state.isExpense,
+                onTap: () => cubit.setTransactionTypeFilter(
+                  TransactionTypeFilter.income,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(
+    TransactionListState state,
+    TransactionListCubit cubit,
+    AppColorScheme c,
+  ) {
+    final typeLabel = state.isExpense ? 'expense' : 'income';
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
       child: Container(
@@ -339,7 +386,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
           onChanged: cubit.updateSearch,
           style: TextStyle(color: c.textPrimary, fontSize: 14),
           decoration: InputDecoration(
-            hintText: 'Search categories or sub-categories',
+            hintText: 'Search $typeLabel categories',
             hintStyle: TextStyle(color: c.textHint, fontSize: 13),
             prefixIcon: Icon(Icons.search, color: c.textSecondary, size: 20),
             border: InputBorder.none,
@@ -351,9 +398,10 @@ class _TransactionListPageState extends State<TransactionListPage> {
   }
 
   Widget _buildSpendingTotal(TransactionListState state, AppColorScheme c) {
-    final label = state.viewMode == ViewMode.week
+    final dateLabel = state.viewMode == ViewMode.week
         ? DateFormat('MMM d, yyyy').format(state.selectedDate)
         : DateFormat('MMMM yyyy').format(state.selectedDate);
+    final typeLabel = state.isExpense ? 'Spending' : 'Income';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -362,7 +410,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
           Icon(Icons.calendar_month_outlined, color: c.textSecondary, size: 17),
           const SizedBox(width: 8),
           Text(
-            'Spending for $label',
+            'Total $typeLabel for $dateLabel',
             style: TextStyle(fontSize: 14, color: c.textSecondary),
           ),
           const Spacer(),
@@ -371,7 +419,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: c.textPrimary,
+              color: state.isExpense ? c.textPrimary : const Color(0xFF4ADE80),
             ),
           ),
         ],
@@ -529,10 +577,49 @@ class _ToggleBtn extends StatelessWidget {
   }
 }
 
+class _TransactionTypeBtn extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TransactionTypeBtn({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? c.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: selected ? c.background : c.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Section header ───────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader();
+  final bool isExpense;
+
+  const _SectionHeader({required this.isExpense});
 
   @override
   Widget build(BuildContext context) {
@@ -540,7 +627,7 @@ class _SectionHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Text(
-        'SPENDING BY CATEGORY',
+        isExpense ? 'SPENDING BY CATEGORY' : 'INCOME BY CATEGORY',
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,

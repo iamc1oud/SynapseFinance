@@ -15,6 +15,7 @@ class GetTransactionsByCategoryUseCase {
     GetTransactionsByCategoryParams params,
   ) {
     return _repository.getTransactionsByCategory(
+      transactionType: params.transactionType,
       dateFrom: params.dateFrom,
       dateTo: params.dateTo,
     );
@@ -22,8 +23,13 @@ class GetTransactionsByCategoryUseCase {
 }
 
 class GetTransactionsByCategoryParams {
+  final String transactionType;
   final DateTime? dateFrom;
   final DateTime? dateTo;
 
-  const GetTransactionsByCategoryParams({this.dateFrom, this.dateTo});
+  const GetTransactionsByCategoryParams({
+    this.transactionType = 'expense',
+    this.dateFrom,
+    this.dateTo,
+  });
 }

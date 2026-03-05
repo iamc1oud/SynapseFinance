@@ -191,19 +191,20 @@ def list_transactions(
     response={200: list[CategorySpendingResponse]},
     auth=JWTAuth(),
     description=(
-        "Return total expense spending grouped by category, ordered highest to lowest. "
-        "Optionally filter by date range (date_from, date_to). "
-        "Only includes expense transactions."
+        "Return total spending grouped by category, ordered highest to lowest. "
+        "Filter by transaction_type (expense or income, defaults to expense). "
+        "Optionally filter by date range (date_from, date_to)."
     ),
 )
 def spending_by_category(
     request,
+    transaction_type: str = 'expense',
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
 ):
     qs = Transaction.objects.filter(
         user=request.auth,
-        transaction_type='expense',
+        transaction_type=transaction_type,
     ).select_related('category')
 
     if date_from:
@@ -234,14 +235,16 @@ def spending_by_category(
     response={200: list[CategoryTransactionGroupResponse]},
     auth=JWTAuth(),
     description=(
-        "Return expense transactions grouped by category. "
+        "Return transactions grouped by category. "
         "Each group contains the category name, icon, total amount, and all matching transactions. "
+        "Filter by transaction_type (expense or income, defaults to expense). "
         "Optionally filter by date range (date_from, date_to). "
-        "Groups are ordered by total spending descending."
+        "Groups are ordered by total amount descending."
     ),
 )
 def transactions_by_category(
     request,
+    transaction_type: str = 'expense',
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
 ):
@@ -249,7 +252,7 @@ def transactions_by_category(
 
     qs = Transaction.objects.filter(
         user=request.auth,
-        transaction_type='expense',
+        transaction_type=transaction_type,
     ).select_related('account', 'to_account', 'category').prefetch_related('tags')
 
     if date_from:

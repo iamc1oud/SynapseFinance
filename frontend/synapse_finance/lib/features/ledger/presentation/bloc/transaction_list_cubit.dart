@@ -16,6 +16,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
     final result = await _getTransactionsByCategoryUseCase(
       GetTransactionsByCategoryParams(
+        transactionType: state.transactionTypeFilter.name,
         dateFrom: state.dateFrom,
         dateTo: state.dateTo,
       ),
@@ -47,6 +48,14 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
   void setViewMode(ViewMode mode) {
     emit(state.copyWith(viewMode: mode));
+    loadData();
+  }
+
+  void setTransactionTypeFilter(TransactionTypeFilter filter) {
+    emit(state.copyWith(
+      transactionTypeFilter: filter,
+      expandedCategoryIds: [],
+    ));
     loadData();
   }
 

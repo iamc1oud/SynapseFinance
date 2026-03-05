@@ -128,10 +128,13 @@ class LedgerApiClient {
   }
 
   Future<List<CategorySpendingModel>> getCategorySpending({
+    String transactionType = 'expense',
     DateTime? dateFrom,
     DateTime? dateTo,
   }) async {
-    final params = <String, dynamic>{};
+    final params = <String, dynamic>{
+      'transaction_type': transactionType,
+    };
     if (dateFrom != null) {
       params['date_from'] = DateFormat('yyyy-MM-dd').format(dateFrom);
     }
@@ -140,7 +143,7 @@ class LedgerApiClient {
     }
     final response = await _dio.get(
       ApiConstants.categorySpending,
-      queryParameters: params.isNotEmpty ? params : null,
+      queryParameters: params,
     );
     final list = response.data as List<dynamic>;
     return list
@@ -149,10 +152,13 @@ class LedgerApiClient {
   }
 
   Future<List<CategoryTransactionGroupModel>> getTransactionsByCategory({
+    String transactionType = 'expense',
     DateTime? dateFrom,
     DateTime? dateTo,
   }) async {
-    final params = <String, dynamic>{};
+    final params = <String, dynamic>{
+      'transaction_type': transactionType,
+    };
     if (dateFrom != null) {
       params['date_from'] = DateFormat('yyyy-MM-dd').format(dateFrom);
     }
@@ -161,7 +167,7 @@ class LedgerApiClient {
     }
     final response = await _dio.get(
       ApiConstants.transactionsByCategory,
-      queryParameters: params.isNotEmpty ? params : null,
+      queryParameters: params,
     );
     final list = response.data as List<dynamic>;
     return list

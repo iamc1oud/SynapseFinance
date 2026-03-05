@@ -101,11 +101,13 @@ class LedgerRepositoryImpl implements LedgerRepository {
 
   @override
   Future<Either<Failure, List<CategorySpending>>> getCategorySpending({
+    String transactionType = 'expense',
     DateTime? dateFrom,
     DateTime? dateTo,
   }) async {
     try {
       final spending = await _apiClient.getCategorySpending(
+        transactionType: transactionType,
         dateFrom: dateFrom,
         dateTo: dateTo,
       );
@@ -119,11 +121,13 @@ class LedgerRepositoryImpl implements LedgerRepository {
 
   @override
   Future<Either<Failure, List<CategoryTransactionGroup>>> getTransactionsByCategory({
+    String transactionType = 'expense',
     DateTime? dateFrom,
     DateTime? dateTo,
   }) async {
     try {
       final groups = await _apiClient.getTransactionsByCategory(
+        transactionType: transactionType,
         dateFrom: dateFrom,
         dateTo: dateTo,
       );
