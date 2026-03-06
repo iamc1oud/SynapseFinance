@@ -88,7 +88,7 @@ async def login(request, payload: LoginRequest):
 
 
 @router.post("/refresh", response={200: TokenResponse, 401: ErrorResponse})
-async def refresh(request, payload: RefreshTokenRequest):
+def refresh(request, payload: RefreshTokenRequest):
     """Get new access and refresh tokens using a valid refresh token."""
     try:
         # Verify first to get the user for RLS context, then do the
@@ -96,7 +96,7 @@ async def refresh(request, payload: RefreshTokenRequest):
         user = verify_refresh_token(payload.refresh_token)
 
         revoke_refresh_token(payload.refresh_token)
-        access_token, new_refresh_token = await create_tokens(user)
+        access_token, new_refresh_token = async_to_sync(create_tokens)(user)
         return 200, TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
     except AuthenticationError as e:
         return 401, ErrorResponse(detail=str(e))

@@ -21,15 +21,20 @@ class _SettingsPageState extends State<SettingsPage> {
     final themeMode = context.watch<ThemeCubit>().state;
     final isDark = themeMode == ThemeMode.dark;
     final user = context.select(
-      (AuthCubit c) => c.state.status == AuthStatus.authenticated ? c.state.user : null,
+      (AuthCubit c) =>
+          c.state.status == AuthStatus.authenticated ? c.state.user : null,
     );
 
     final bg = isDark ? const Color(0xFF0A1A0A) : const Color(0xFFF0F4F0);
     final rowBg = isDark ? const Color(0xFF122112) : const Color(0xFFFFFFFF);
     final onSurface = isDark ? Colors.white : const Color(0xFF0D1B0D);
-    final onSurfaceSecondary = isDark ? const Color(0xFF8B9E8B) : const Color(0xFF4A5C4A);
+    final onSurfaceSecondary = isDark
+        ? const Color(0xFF8B9E8B)
+        : const Color(0xFF4A5C4A);
     final divider = isDark ? const Color(0xFF243624) : const Color(0xFFD8E8D8);
-    final sectionLabel = isDark ? const Color(0xFF6B7E6B) : const Color(0xFF6B7C6B);
+    final sectionLabel = isDark
+        ? const Color(0xFF6B7E6B)
+        : const Color(0xFF6B7C6B);
 
     return Scaffold(
       backgroundColor: bg,
@@ -85,6 +90,43 @@ class _SettingsPageState extends State<SettingsPage> {
                     iconBg: const Color(0xFF059669),
                     icon: Icons.layers_rounded,
                     label: 'Data Export & Backup',
+                    isLast: true,
+                  ),
+                ],
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+            SliverToBoxAdapter(
+              child: _SectionGroup(
+                label: 'CATEGORY & ACCOUNTS',
+                labelColor: sectionLabel,
+                rowBg: rowBg,
+                divider: divider,
+                onSurface: onSurface,
+                onSurfaceSecondary: onSurfaceSecondary,
+                rows: [
+                  _SettingsRow(
+                    iconBg: const Color(0xFF1E6FDB),
+                    icon: Icons.payments,
+                    label: 'Income Category Settings',
+                  ),
+                  _SettingsRow(
+                    iconBg: const Color(0xFF7C3AED),
+                    icon: Icons.category,
+                    label: 'Expense Category Settings',
+                  ),
+                  _SettingsRow(
+                    iconBg: const Color(0xFF059669),
+                    icon: Icons.account_balance,
+                    label: 'Account Settings',
+                    isLast: true,
+                  ),
+                  _SettingsRow(
+                    iconBg: const Color(0xFF059669),
+                    icon: Icons.assessment,
+                    label: 'Budget Settings',
                     isLast: true,
                   ),
                 ],
@@ -200,9 +242,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
             // ── Footer ────────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: _buildFooter(onSurfaceSecondary),
-            ),
+            SliverToBoxAdapter(child: _buildFooter(onSurfaceSecondary)),
 
             const SliverToBoxAdapter(child: SizedBox(height: 32)),
           ],
@@ -229,7 +269,9 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               CircleAvatar(
                 radius: 44,
-                backgroundColor: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+                backgroundColor: const Color(
+                  0xFF4ADE80,
+                ).withValues(alpha: 0.15),
                 child: Text(
                   initials,
                   style: const TextStyle(
@@ -270,10 +312,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 4),
           Text(
             email,
-            style: TextStyle(
-              color: onSurfaceSecondary,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: onSurfaceSecondary, fontSize: 13),
           ),
           const SizedBox(height: 10),
           Container(
@@ -367,7 +406,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? const Color(0xFF122112) : const Color(0xFFFFFFFF);
     final onSurface = isDark ? Colors.white : const Color(0xFF0D1B0D);
-    final secondary = isDark ? const Color(0xFF8B9E8B) : const Color(0xFF4A5C4A);
+    final secondary = isDark
+        ? const Color(0xFF8B9E8B)
+        : const Color(0xFF4A5C4A);
 
     showModalBottomSheet<void>(
       context: context,
@@ -602,12 +643,7 @@ class _SettingsRowTile extends StatelessWidget {
             ),
           ),
           if (showDivider)
-            Divider(
-              height: 1,
-              thickness: 0.5,
-              indent: 64,
-              color: divider,
-            ),
+            Divider(height: 1, thickness: 0.5, indent: 64, color: divider),
         ],
       ),
     );
@@ -636,11 +672,7 @@ class _LogoutButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Icon(
-                Icons.logout_rounded,
-                color: Color(0xFFF85149),
-                size: 20,
-              ),
+              Icon(Icons.logout_rounded, color: Color(0xFFF85149), size: 20),
               SizedBox(width: 10),
               Text(
                 'Log Out',
@@ -694,7 +726,11 @@ class _AppearanceOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: selected ? const Color(0xFF4ADE80) : secondary, size: 20),
+            Icon(
+              icon,
+              color: selected ? const Color(0xFF4ADE80) : secondary,
+              size: 20,
+            ),
             const SizedBox(width: 12),
             Text(
               label,
@@ -706,7 +742,11 @@ class _AppearanceOption extends StatelessWidget {
             ),
             const Spacer(),
             if (selected)
-              const Icon(Icons.check_circle_rounded, color: Color(0xFF4ADE80), size: 20),
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Color(0xFF4ADE80),
+                size: 20,
+              ),
           ],
         ),
       ),
