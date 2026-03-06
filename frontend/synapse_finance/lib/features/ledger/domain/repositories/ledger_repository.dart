@@ -16,6 +16,8 @@ abstract class LedgerRepository {
     required String icon,
     required String categoryType,
   });
+  Future<Either<Failure, Category>> archiveCategory({required int id});
+  Future<Either<Failure, Category>> restoreCategory({required int id});
   Future<Either<Failure, List<Tag>>> getTags();
 
   Future<Either<Failure, List<Transaction>>> getTransactions({

@@ -44,6 +44,20 @@ class LedgerApiClient {
     return CategoryModel.fromJson(response.data!);
   }
 
+  Future<CategoryModel> archiveCategory(int id) async {
+    final response = await _dio.patch<Map<String, dynamic>>(
+      '${ApiConstants.categories}/$id/archive',
+    );
+    return CategoryModel.fromJson(response.data!);
+  }
+
+  Future<CategoryModel> restoreCategory(int id) async {
+    final response = await _dio.patch<Map<String, dynamic>>(
+      '${ApiConstants.categories}/$id/restore',
+    );
+    return CategoryModel.fromJson(response.data!);
+  }
+
   Future<List<TagModel>> getTags() async {
     final response = await _dio.get(ApiConstants.tags);
     final list = response.data as List<dynamic>;

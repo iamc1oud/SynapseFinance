@@ -53,7 +53,7 @@ class TestAccountEndpoints:
 class TestCategoryEndpoints:
     def test_create_expense_category(self, client, auth_headers):
         response = client.post(
-            "/api/ledger/categories/",
+            "/api/ledger/categories",
             data={"name": "Transport", "icon": "car", "category_type": "expense"},
             content_type="application/json",
             **auth_headers,
@@ -62,14 +62,87 @@ class TestCategoryEndpoints:
         assert response.json()["name"] == "Transport"
 
     def test_list_categories_all(self, client, auth_headers, expense_category, income_category):
-        response = client.get("/api/ledger/categories/", **auth_headers)
+        response = client.get("/api/ledger/categories", **auth_headers)
         assert response.status_code == 200
         assert len(response.json()) == 2
 
     def test_list_categories_filter_by_type(self, client, auth_headers, expense_category, income_category):
-        response = client.get("/api/ledger/categories/?category_type=expense", **auth_headers)
+        response = client.get("/api/ledger/categories?category_type=expense", **auth_headers)
         assert response.status_code == 200
         assert all(c["category_type"] == "expense" for c in response.json())
+
+    def test_create_category_not_archived_by_default(self, client, auth_headers):
+        response = client.post(
+            "/api/ledger/categories",
+            data={"name": "Groceries", "icon": "cart", "category_type": "expense"},
+            content_type="application/json",
+            **auth_headers,
+        )
+        assert response.status_code == 201
+        assert response.json()["is_archived"] is False
+
+    def test_archive_category(self, client, auth_headers, expense_category):
+        response = client.patch(
+            f"/api/ledger/categories/{expense_category.id}/archive",
+            content_type="application/json",
+            **auth_headers,
+        )
+        assert response.status_code == 200
+        assert response.json()["is_archived"] is True
+
+    def test_restore_category(self, client, auth_headers, expense_category):
+        # Archive first
+        client.patch(
+            f"/api/ledger/categories/{expense_category.id}/archive",
+            content_type="application/json",
+            **auth_headers,
+        )
+        # Restore
+        response = client.patch(
+            f"/api/ledger/categories/{expense_category.id}/restore",
+            content_type="application/json",
+            **auth_headers,
+        )
+        assert response.status_code == 200
+        assert response.json()["is_archived"] is False
+
+    def test_archive_category_not_found(self, client, auth_headers):
+        response = client.patch(
+            "/api/ledger/categories/99999/archive",
+            content_type="application/json",
+            **auth_headers,
+        )
+        assert response.status_code == 404
+
+    def test_list_excludes_archived(self, client, auth_headers, expense_category, income_category):
+        # Archive one category
+        client.patch(
+            f"/api/ledger/categories/{expense_category.id}/archive",
+            content_type="application/json",
+            **auth_headers,
+        )
+        # Default list returns all (no is_archived filter)
+        response = client.get("/api/ledger/categories", **auth_headers)
+        assert response.status_code == 200
+        assert len(response.json()) == 2
+
+        # Filter active only
+        response = client.get("/api/ledger/categories?is_archived=false", **auth_headers)
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        assert response.json()[0]["is_archived"] is False
+
+    def test_list_archived_only(self, client, auth_headers, expense_category, income_category):
+        # Archive one
+        client.patch(
+            f"/api/ledger/categories/{expense_category.id}/archive",
+            content_type="application/json",
+            **auth_headers,
+        )
+        response = client.get("/api/ledger/categories?is_archived=true", **auth_headers)
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        assert response.json()[0]["is_archived"] is True
 
 
 # ── Tag Endpoints ────────────────────────────────────────────────────────────

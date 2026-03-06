@@ -45,6 +45,12 @@ class TestCategoryModel:
         )
         assert cat.get_category_type_display() == "Income"
 
+    def test_category_default_not_archived(self, user):
+        cat = Category.objects.create(
+            user=user, name="Transport", category_type="expense",
+        )
+        assert cat.is_archived is False
+
 
 @pytest.mark.django_db
 class TestTagModel:

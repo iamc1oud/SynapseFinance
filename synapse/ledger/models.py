@@ -63,6 +63,7 @@ class Category(models.Model):
     category_type = models.CharField(
         max_length=10, choices=CATEGORY_TYPES, default='expense',
     )
+    is_archived = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

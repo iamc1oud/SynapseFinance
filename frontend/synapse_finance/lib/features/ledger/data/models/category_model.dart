@@ -6,6 +6,7 @@ class CategoryModel extends Category {
     required super.name,
     required super.icon,
     required super.categoryType,
+    super.isArchived = false,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
@@ -14,6 +15,7 @@ class CategoryModel extends Category {
       name: json['name'] as String,
       icon: json['icon'] as String? ?? '',
       categoryType: json['category_type'] as String,
+      isArchived: json['is_archived'] as bool? ?? false,
     );
   }
 }

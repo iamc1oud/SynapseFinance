@@ -52,6 +52,7 @@ class CategoryResponse(Schema):
     name: str
     icon: str
     category_type: str
+    is_archived: bool
 
     @staticmethod
     def from_category(category):
@@ -60,6 +61,7 @@ class CategoryResponse(Schema):
             name=category.name,
             icon=category.icon,
             category_type=category.category_type,
+            is_archived=category.is_archived,
         )
 
 
