@@ -41,6 +41,39 @@ class AuthCubit extends Cubit<AuthState> {
     return super.close();
   }
 
+  /// Same as [checkAuthStatus] but waits at least 2 seconds so the splash
+  /// screen has time to animate before the router redirects.
+  Future<void> checkAuthStatusDelayed() async {
+    emit(const AuthState.loading());
+
+    // Run auth check and minimum delay in parallel
+    late AuthState resolvedState;
+    await Future.wait([
+      (() async {
+        final result = await _checkAuthStatusUseCase(const NoParams());
+        await result.fold(
+          (failure) async {
+            resolvedState = const AuthState.unauthenticated();
+          },
+          (isLoggedIn) async {
+            if (isLoggedIn) {
+              final userResult = await _getCurrentUserUseCase(const NoParams());
+              resolvedState = userResult.fold(
+                (_) => const AuthState.unauthenticated(),
+                (user) => AuthState.authenticated(user),
+              );
+            } else {
+              resolvedState = const AuthState.unauthenticated();
+            }
+          },
+        );
+      })(),
+      Future.delayed(const Duration(seconds: 2)),
+    ]);
+
+    emit(resolvedState);
+  }
+
   Future<void> checkAuthStatus() async {
     emit(const AuthState.loading());
 

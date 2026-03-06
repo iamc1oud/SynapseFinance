@@ -88,7 +88,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final refreshToken = await _tokenStorage.getRefreshToken();
       if (refreshToken != null) {
-        await _apiClient.logout({'refresh': refreshToken});
+        await _apiClient.logout({'refresh_token': refreshToken});
       }
       await _localDataSource.clearCache();
       return const Right(null);

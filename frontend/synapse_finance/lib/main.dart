@@ -23,7 +23,9 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<ThemeCubit>()),
-        BlocProvider(create: (_) => getIt<AuthCubit>()..checkAuthStatus()),
+        BlocProvider(
+          create: (_) => getIt<AuthCubit>()..checkAuthStatusDelayed(),
+        ),
       ],
       child: Builder(
         builder: (context) {

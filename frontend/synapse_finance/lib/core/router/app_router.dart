@@ -6,6 +6,7 @@ import '../../features/auth/presentation/bloc/auth_cubit.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/ledger/domain/usecases/create_category_usecase.dart';
 import '../../features/ledger/presentation/bloc/add_transaction_cubit.dart';
 import '../../features/ledger/presentation/bloc/add_transfer_cubit.dart';
@@ -21,25 +22,40 @@ class AppRouter {
   AppRouter(this.authCubit);
 
   late final GoRouter router = GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     debugLogDiagnostics: true,
     refreshListenable: GoRouterRefreshStream(authCubit.stream),
     redirect: (context, state) {
-      final isAuthenticated =
-          authCubit.state.status == AuthStatus.authenticated;
-      final isLoggingIn = state.matchedLocation == '/login';
+      final status = authCubit.state.status;
+      final location = state.matchedLocation;
 
-      if (!isAuthenticated && !isLoggingIn) {
+      // Stay on splash while auth is resolving
+      if (status == AuthStatus.initial || status == AuthStatus.loading) {
+        return location == '/splash' ? null : '/splash';
+      }
+
+      // Auth resolved — navigate away from splash
+      final isAuthenticated = status == AuthStatus.authenticated;
+
+      if (location == '/splash') {
+        return isAuthenticated ? '/' : '/login';
+      }
+
+      if (!isAuthenticated && location != '/login') {
         return '/login';
       }
 
-      if (isAuthenticated && isLoggingIn) {
+      if (isAuthenticated && location == '/login') {
         return '/';
       }
 
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashPage(),
+      ),
       GoRoute(path: '/', builder: (context, state) => const HomePage()),
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
