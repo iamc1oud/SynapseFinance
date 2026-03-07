@@ -11,7 +11,7 @@ class ApiConstants {
   static const String user = '/auth/user';
 
   // Ledger endpoints
-  static const String accounts = '/ledger/accounts';
+  static const String accounts = '/ledger/accounts/';
   static const String categories = '/ledger/categories';
   static const String tags = '/ledger/tags';
   static const String transactions = '/ledger/transactions';

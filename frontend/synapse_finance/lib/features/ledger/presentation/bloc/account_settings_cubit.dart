@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../domain/entities/account.dart';
 import '../../domain/usecases/archive_account_usecase.dart';
 import '../../domain/usecases/get_accounts_usecase.dart';
 import '../../domain/usecases/update_account_usecase.dart';
@@ -23,17 +24,24 @@ class AccountSettingsCubit extends Cubit<AccountSettingsState> {
   Future<void> loadAccounts() async {
     emit(state.copyWith(status: AccountSettingsStatus.loading));
 
-    // Fetch all accounts (active + archived) for the settings page
-    final result = await _getAccountsUseCase(const GetAccountsParams());
+    // Fetch active and archived accounts separately
+    final activeResult = await _getAccountsUseCase(
+      const GetAccountsParams(isActive: true),
+    );
+    final archivedResult = await _getAccountsUseCase(
+      const GetAccountsParams(isActive: false),
+    );
 
-    result.fold(
+    activeResult.fold(
       (failure) => emit(state.copyWith(
         status: AccountSettingsStatus.error,
         errorMessage: failure.message,
       )),
-      (accounts) {
-        final active = accounts.where((a) => a.isActive).toList();
-        final archived = accounts.where((a) => !a.isActive).toList();
+      (active) {
+        final archived = archivedResult.fold(
+          (_) => <Account>[],
+          (list) => list,
+        );
         emit(state.copyWith(
           status: AccountSettingsStatus.loaded,
           activeAccounts: active,

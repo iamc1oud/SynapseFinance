@@ -557,7 +557,18 @@ class _ArchivedSectionState extends State<_ArchivedSection> {
             ),
           ),
         ),
-        if (_expanded)
+        if (_expanded) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Text(
+              'Only accounts archived in the last 30 days are shown.',
+              style: TextStyle(
+                color: c.textHint,
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
           ...widget.accounts.map(
             (account) => Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -626,6 +637,7 @@ class _ArchivedSectionState extends State<_ArchivedSection> {
               ),
             ),
           ),
+        ],
       ],
     );
   }

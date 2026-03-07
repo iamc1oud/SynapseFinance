@@ -1,7 +1,9 @@
+from datetime import timedelta
 from typing import Optional
 
 from accounts.auth import JWTAuth
 from accounts.schemas import ErrorResponse
+from django.utils import timezone
 from ninja import Router
 
 from ..models import Account
@@ -38,6 +40,10 @@ def list_accounts(request, is_active: Optional[bool] = None):
     qs = Account.objects.filter(user=request.auth)
     if is_active is not None:
         qs = qs.filter(is_active=is_active)
+        # Only show accounts archived within the last 30 days
+        if is_active is False:
+            cutoff = timezone.now() - timedelta(days=30)
+            qs = qs.filter(updated_at__gte=cutoff)
     else:
         qs = qs.filter(is_active=True)
     return 200, [AccountResponse.from_account(a) for a in qs]
