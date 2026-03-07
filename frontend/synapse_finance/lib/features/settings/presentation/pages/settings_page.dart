@@ -5,6 +5,7 @@ import '../../../../core/theme/theme_cubit.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import 'account_settings_page.dart';
 import 'category_settings_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -87,12 +88,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     label: 'Subscription Plan',
                     trailing: 'AI Premium',
                   ),
-                  _SettingsRow(
-                    iconBg: const Color(0xFF059669),
-                    icon: Icons.layers_rounded,
-                    label: 'Data Export & Backup',
-                    isLast: true,
-                  ),
                 ],
               ),
             ),
@@ -114,9 +109,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     label: 'Income Category Settings',
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => const CategorySettingsPage(
-                          categoryType: 'income',
-                        ),
+                        builder: (_) =>
+                            const CategorySettingsPage(categoryType: 'income'),
                       ),
                     ),
                   ),
@@ -126,9 +120,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     label: 'Expense Category Settings',
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => const CategorySettingsPage(
-                          categoryType: 'expense',
-                        ),
+                        builder: (_) =>
+                            const CategorySettingsPage(categoryType: 'expense'),
                       ),
                     ),
                   ),
@@ -136,7 +129,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     iconBg: const Color(0xFF059669),
                     icon: Icons.account_balance,
                     label: 'Account Settings',
-                    isLast: true,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AccountSettingsPage(),
+                      ),
+                    ),
                   ),
                   _SettingsRow(
                     iconBg: const Color(0xFF059669),

@@ -20,10 +20,82 @@ class LedgerRepositoryImpl implements LedgerRepository {
   LedgerRepositoryImpl(this._apiClient);
 
   @override
-  Future<Either<Failure, List<Account>>> getAccounts() async {
+  Future<Either<Failure, List<Account>>> getAccounts({bool? isActive}) async {
     try {
-      final accounts = await _apiClient.getAccounts();
+      final accounts = await _apiClient.getAccounts(isActive: isActive);
       return Right(accounts);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('$e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Account>> createAccount({
+    required String name,
+    required String accountType,
+    required double balance,
+    required String currency,
+    required String icon,
+  }) async {
+    try {
+      final account = await _apiClient.createAccount(
+        name: name,
+        accountType: accountType,
+        balance: balance,
+        currency: currency,
+        icon: icon,
+      );
+      return Right(account);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('$e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Account>> updateAccount({
+    required int id,
+    String? name,
+    String? accountType,
+    String? currency,
+    String? icon,
+  }) async {
+    try {
+      final account = await _apiClient.updateAccount(
+        id,
+        name: name,
+        accountType: accountType,
+        currency: currency,
+        icon: icon,
+      );
+      return Right(account);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('$e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Account>> archiveAccount({required int id}) async {
+    try {
+      final account = await _apiClient.archiveAccount(id);
+      return Right(account);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('$e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Account>> restoreAccount({required int id}) async {
+    try {
+      final account = await _apiClient.restoreAccount(id);
+      return Right(account);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {

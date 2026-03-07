@@ -23,7 +23,7 @@ class AddTransferCubit extends Cubit<AddTransferState> {
   Future<void> loadData() async {
     emit(state.copyWith(status: AddTransferStatus.loading));
 
-    final accountsResult = await _getAccountsUseCase(const NoParams());
+    final accountsResult = await _getAccountsUseCase(const GetAccountsParams());
     final tagsResult = await _getTagsUseCase(const NoParams());
 
     accountsResult.fold(

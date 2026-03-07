@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../domain/entities/account.dart';
 import '../bloc/add_transaction_cubit.dart';
 import '../bloc/add_transaction_state.dart';
 import '../widgets/category_selector.dart';
@@ -233,6 +234,19 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
+          _InfoRow(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'ACCOUNT',
+            value: state.selectedAccount?.name ?? 'Select account',
+            onTap: () => _showAccountPicker(
+              context,
+              c,
+              accounts: state.accounts,
+              selected: state.selectedAccount,
+              onSelected: cubit.selectAccount,
+            ),
+          ),
+          const SizedBox(height: 8),
           _InfoRow(
             icon: Icons.calendar_today_outlined,
             label: 'DATE',
@@ -732,6 +746,56 @@ class _InfoRow extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showAccountPicker(
+  BuildContext context,
+  AppColorScheme c, {
+  required List<Account> accounts,
+  required Account? selected,
+  required ValueChanged<Account> onSelected,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: c.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => ListView(
+      shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            'Select Account',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: c.textPrimary,
+            ),
+          ),
+        ),
+        ...accounts.map(
+          (a) => ListTile(
+            leading: Icon(Icons.account_balance_wallet, color: c.primary),
+            title: Text(a.name, style: TextStyle(color: c.textPrimary)),
+            subtitle: Text(
+              a.formattedBalance,
+              style: TextStyle(color: c.textSecondary),
+            ),
+            trailing: a.id == selected?.id
+                ? Icon(Icons.check_circle, color: c.primary, size: 20)
+                : null,
+            onTap: () {
+              onSelected(a);
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _NoteRow extends StatelessWidget {
