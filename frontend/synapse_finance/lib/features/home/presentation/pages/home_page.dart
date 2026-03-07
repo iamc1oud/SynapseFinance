@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage> {
       ),
       child: const TransactionListPage(),
     ),
-    const _CategoriesTab(),
     const SettingsPage(),
   ];
 
@@ -40,7 +39,7 @@ class _HomePageState extends State<HomePage> {
       extendBody: true,
       backgroundColor: c.background,
       body: IndexedStack(index: _currentIndex, children: _tabs),
-      floatingActionButton: _currentIndex != 3
+      floatingActionButton: _currentIndex != 2
           ? FloatingActionButton(
               onPressed: () => context.push('/add-transaction'),
               backgroundColor: c.primary,
@@ -67,7 +66,6 @@ class _FrostedNavBar extends StatelessWidget {
   static const _items = [
     (Icons.chat_bubble_outline_rounded, 'Assistant'),
     (Icons.bar_chart_rounded, 'Insights'),
-    (Icons.category_outlined, 'Categories'),
     (Icons.settings_outlined, 'Settings'),
   ];
 
@@ -206,50 +204,3 @@ class _AssistantTab extends StatelessWidget {
   }
 }
 
-class _CategoriesTab extends StatelessWidget {
-  const _CategoriesTab();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.appColors;
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.category, size: 56, color: c.primary),
-            const SizedBox(height: 16),
-            Text(
-              'Manage Categories',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: c.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Organise your spending by category',
-              style: TextStyle(color: c.textSecondary),
-            ),
-            const SizedBox(height: 32),
-            TextButton.icon(
-              onPressed: () => context.push('/create-category'),
-              icon: Icon(Icons.add_circle_outline, color: c.primary),
-              label: Text(
-                'New Category',
-                style: TextStyle(color: c.primary),
-              ),
-              style: TextButton.styleFrom(
-                textStyle: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
