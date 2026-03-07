@@ -7,6 +7,7 @@ import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import 'account_settings_page.dart';
 import 'category_settings_page.dart';
+import 'personal_information_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -81,6 +82,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     iconBg: const Color(0xFF1E6FDB),
                     icon: Icons.person_outline_rounded,
                     label: 'Personal Information',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const PersonalInformationPage(),
+                      ),
+                    ),
                   ),
                   _SettingsRow(
                     iconBg: const Color(0xFF7C3AED),

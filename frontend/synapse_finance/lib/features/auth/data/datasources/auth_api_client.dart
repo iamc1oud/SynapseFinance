@@ -27,4 +27,7 @@ abstract class AuthApiClient {
 
   @GET(ApiConstants.user)
   Future<UserModel> getCurrentUser();
+
+  @PATCH(ApiConstants.user)
+  Future<UserModel> updateProfile(@Body() Map<String, dynamic> body);
 }

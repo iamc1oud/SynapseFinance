@@ -8,7 +8,7 @@ part 'user_model.g.dart';
 class UserModel extends User {
   const UserModel({
     required super.id,
-    required super.email,
+    @JsonKey(name: 'email') super.email,
     @JsonKey(name: 'first_name') super.firstName,
     @JsonKey(name: 'last_name') super.lastName,
   });

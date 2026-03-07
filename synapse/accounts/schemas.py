@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ninja import Schema
 from pydantic import EmailStr, field_validator
 
@@ -56,6 +58,11 @@ class AuthResponse(Schema):
 
 class MessageResponse(Schema):
     message: str
+
+
+class UpdateProfileRequest(Schema):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
 
 class ErrorResponse(Schema):

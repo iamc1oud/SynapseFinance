@@ -22,4 +22,9 @@ abstract class AuthRepository {
   Future<Either<Failure, User>> getCurrentUser();
 
   Future<Either<Failure, bool>> isLoggedIn();
+
+  Future<Either<Failure, User>> updateProfile({
+    String? firstName,
+    String? lastName,
+  });
 }

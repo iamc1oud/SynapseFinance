@@ -245,11 +245,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i426.UpdateAccountUseCase>(),
       ),
     );
-    gh.factory<_i660.TransactionListCubit>(
-      () => _i660.TransactionListCubit(
-        gh<_i417.GetTransactionsByCategoryUseCase>(),
-      ),
-    );
     gh.lazySingleton<_i52.AuthCubit>(
       () => _i52.AuthCubit(
         gh<_i188.LoginUseCase>(),
@@ -257,6 +252,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i17.GetCurrentUserUseCase>(),
         gh<_i52.CheckAuthStatusUseCase>(),
         gh<_i702.AuthEventBus>(),
+        gh<_i787.AuthRepository>(),
+      ),
+    );
+    gh.factory<_i660.TransactionListCubit>(
+      () => _i660.TransactionListCubit(
+        gh<_i417.GetTransactionsByCategoryUseCase>(),
       ),
     );
     gh.factory<_i281.LoginCubit>(

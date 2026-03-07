@@ -122,6 +122,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, User>> updateProfile({
+    String? firstName,
+    String? lastName,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (firstName != null) body['first_name'] = firstName;
+      if (lastName != null) body['last_name'] = lastName;
+
+      final user = await _apiClient.updateProfile(body);
+      await _localDataSource.cacheUser(user);
+      return Right(user);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, bool>> isLoggedIn() async {
     try {
       final isLoggedIn = await _localDataSource.isLoggedIn();
