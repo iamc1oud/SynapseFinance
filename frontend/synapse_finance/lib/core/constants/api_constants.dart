@@ -24,6 +24,9 @@ class ApiConstants {
   static const String transactionsByCategory =
       '/ledger/transactions/by-category';
 
+  // Subscription endpoints
+  static const String subscriptions = '/subscriptions/';
+
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);

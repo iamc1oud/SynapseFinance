@@ -10,6 +10,8 @@ import '../../../ledger/domain/usecases/get_transactions_by_category_usecase.dar
 import '../../../ledger/presentation/bloc/transaction_list_cubit.dart';
 import '../../../ledger/presentation/pages/transaction_list_page.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
+import '../../../subscriptions/presentation/bloc/subscription_list_cubit.dart';
+import '../../../subscriptions/presentation/pages/subscription_list_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,8 +22,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  late final SubscriptionListCubit _subscriptionListCubit =
+      getIt<SubscriptionListCubit>();
 
-  final _tabs = [
+  late final _tabs = [
     const _AssistantTab(),
     BlocProvider(
       create: (_) => TransactionListCubit(
@@ -29,8 +33,18 @@ class _HomePageState extends State<HomePage> {
       ),
       child: const TransactionListPage(),
     ),
+    BlocProvider.value(
+      value: _subscriptionListCubit,
+      child: const SubscriptionListPage(),
+    ),
     const SettingsPage(),
   ];
+
+  @override
+  void dispose() {
+    _subscriptionListCubit.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +53,18 @@ class _HomePageState extends State<HomePage> {
       extendBody: true,
       backgroundColor: c.background,
       body: IndexedStack(index: _currentIndex, children: _tabs),
-      floatingActionButton: _currentIndex != 2
+      floatingActionButton: _currentIndex != 3
           ? FloatingActionButton(
-              onPressed: () => context.push('/add-transaction'),
+              onPressed: () async {
+                if (_currentIndex == 2) {
+                  final added = await context.push<bool>('/add-subscription');
+                  if (added == true && mounted) {
+                    _subscriptionListCubit.loadSubscriptions();
+                  }
+                } else {
+                  context.push('/add-transaction');
+                }
+              },
               backgroundColor: c.primary,
               foregroundColor: c.background,
               child: const Icon(Icons.add),
@@ -66,6 +89,7 @@ class _FrostedNavBar extends StatelessWidget {
   static const _items = [
     (Icons.chat_bubble_outline_rounded, 'Assistant'),
     (Icons.bar_chart_rounded, 'Insights'),
+    (Icons.autorenew_rounded, 'Recurring'),
     (Icons.settings_outlined, 'Settings'),
   ];
 

@@ -14,6 +14,10 @@ import '../../features/ledger/presentation/bloc/create_category_cubit.dart';
 import '../../features/ledger/presentation/pages/add_transaction_page.dart';
 import '../../features/ledger/presentation/pages/add_transfer_page.dart';
 import '../../features/ledger/presentation/pages/create_category_page.dart';
+import '../../features/subscriptions/domain/entities/subscription.dart';
+import '../../features/subscriptions/presentation/bloc/add_subscription_cubit.dart';
+import '../../features/subscriptions/presentation/pages/add_subscription_page.dart';
+import '../../features/subscriptions/presentation/pages/subscription_success_page.dart';
 import '../di/injection.dart';
 
 class AppRouter {
@@ -77,6 +81,19 @@ class AppRouter {
         builder: (context, state) => BlocProvider(
           create: (_) => CreateCategoryCubit(getIt<CreateCategoryUseCase>()),
           child: const CreateCategoryPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/add-subscription',
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<AddSubscriptionCubit>(),
+          child: const AddSubscriptionPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/subscription-success',
+        builder: (context, state) => SubscriptionSuccessPage(
+          subscription: state.extra! as Subscription,
         ),
       ),
     ],
