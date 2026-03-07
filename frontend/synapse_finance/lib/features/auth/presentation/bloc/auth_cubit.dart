@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/auth_event_bus.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/check_auth_status_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -18,6 +19,7 @@ class AuthCubit extends Cubit<AuthState> {
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final CheckAuthStatusUseCase _checkAuthStatusUseCase;
   final AuthEventBus _authEventBus;
+  final AuthRepository _authRepository;
 
   late final StreamSubscription<AuthEvent> _eventSubscription;
 
@@ -27,6 +29,7 @@ class AuthCubit extends Cubit<AuthState> {
     this._getCurrentUserUseCase,
     this._checkAuthStatusUseCase,
     this._authEventBus,
+    this._authRepository,
   ) : super(const AuthState.initial()) {
     _eventSubscription = _authEventBus.stream.listen((event) {
       if (event == AuthEvent.sessionExpired) {
@@ -121,6 +124,26 @@ class AuthCubit extends Cubit<AuthState> {
     result.fold(
       (failure) => emit(AuthState.error(failure.message)),
       (_) => emit(const AuthState.unauthenticated()),
+    );
+  }
+
+  Future<String?> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? avatarUrl,
+  }) async {
+    final result = await _authRepository.updateProfile(
+      firstName: firstName,
+      lastName: lastName,
+      avatarUrl: avatarUrl,
+    );
+
+    return result.fold(
+      (failure) => failure.message,
+      (user) {
+        emit(AuthState.authenticated(user));
+        return null;
+      },
     );
   }
 

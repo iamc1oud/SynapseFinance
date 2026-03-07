@@ -9,7 +9,23 @@ import '../entities/tag.dart';
 import '../entities/transaction.dart';
 
 abstract class LedgerRepository {
-  Future<Either<Failure, List<Account>>> getAccounts();
+  Future<Either<Failure, List<Account>>> getAccounts({bool? isActive});
+  Future<Either<Failure, Account>> createAccount({
+    required String name,
+    required String accountType,
+    required double balance,
+    required String currency,
+    required String icon,
+  });
+  Future<Either<Failure, Account>> updateAccount({
+    required int id,
+    String? name,
+    String? accountType,
+    String? currency,
+    String? icon,
+  });
+  Future<Either<Failure, Account>> archiveAccount({required int id});
+  Future<Either<Failure, Account>> restoreAccount({required int id});
   Future<Either<Failure, List<Category>>> getCategories({String? categoryType});
   Future<Either<Failure, Category>> createCategory({
     required String name,

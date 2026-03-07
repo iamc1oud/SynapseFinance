@@ -36,8 +36,12 @@ import '../../features/ledger/data/repositories/ledger_repository_impl.dart'
     as _i321;
 import '../../features/ledger/domain/repositories/ledger_repository.dart'
     as _i11;
+import '../../features/ledger/domain/usecases/archive_account_usecase.dart'
+    as _i292;
 import '../../features/ledger/domain/usecases/archive_category_usecase.dart'
     as _i507;
+import '../../features/ledger/domain/usecases/create_account_usecase.dart'
+    as _i146;
 import '../../features/ledger/domain/usecases/create_category_usecase.dart'
     as _i188;
 import '../../features/ledger/domain/usecases/create_expense_usecase.dart'
@@ -57,16 +61,40 @@ import '../../features/ledger/domain/usecases/get_transactions_by_category_useca
     as _i417;
 import '../../features/ledger/domain/usecases/get_transactions_usecase.dart'
     as _i1058;
+import '../../features/ledger/domain/usecases/update_account_usecase.dart'
+    as _i426;
+import '../../features/ledger/presentation/bloc/account_settings_cubit.dart'
+    as _i718;
 import '../../features/ledger/presentation/bloc/add_transaction_cubit.dart'
     as _i99;
 import '../../features/ledger/presentation/bloc/add_transfer_cubit.dart'
     as _i784;
 import '../../features/ledger/presentation/bloc/category_settings_cubit.dart'
     as _i696;
+import '../../features/ledger/presentation/bloc/create_account_cubit.dart'
+    as _i444;
 import '../../features/ledger/presentation/bloc/create_category_cubit.dart'
     as _i395;
 import '../../features/ledger/presentation/bloc/transaction_list_cubit.dart'
     as _i660;
+import '../../features/subscriptions/data/datasources/subscription_api_client.dart'
+    as _i22;
+import '../../features/subscriptions/data/repositories/subscription_repository_impl.dart'
+    as _i944;
+import '../../features/subscriptions/domain/repositories/subscription_repository.dart'
+    as _i384;
+import '../../features/subscriptions/domain/usecases/create_subscription_usecase.dart'
+    as _i33;
+import '../../features/subscriptions/domain/usecases/delete_subscription_usecase.dart'
+    as _i170;
+import '../../features/subscriptions/domain/usecases/get_subscriptions_usecase.dart'
+    as _i607;
+import '../../features/subscriptions/domain/usecases/toggle_subscription_usecase.dart'
+    as _i990;
+import '../../features/subscriptions/presentation/bloc/add_subscription_cubit.dart'
+    as _i843;
+import '../../features/subscriptions/presentation/bloc/subscription_list_cubit.dart'
+    as _i978;
 import '../network/auth_event_bus.dart' as _i702;
 import '../network/auth_interceptor.dart' as _i908;
 import '../network/dio_client.dart' as _i667;
@@ -126,6 +154,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i881.LedgerApiClient>(
       () => _i881.LedgerApiClient(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i22.SubscriptionApiClient>(
+      () => _i22.SubscriptionApiClient(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
         gh<_i552.AuthApiClient>(),
@@ -136,11 +167,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i11.LedgerRepository>(
       () => _i321.LedgerRepositoryImpl(gh<_i881.LedgerApiClient>()),
     );
+    gh.lazySingleton<_i292.ArchiveAccountUseCase>(
+      () => _i292.ArchiveAccountUseCase(gh<_i11.LedgerRepository>()),
+    );
+    gh.lazySingleton<_i292.RestoreAccountUseCase>(
+      () => _i292.RestoreAccountUseCase(gh<_i11.LedgerRepository>()),
+    );
     gh.lazySingleton<_i507.ArchiveCategoryUseCase>(
       () => _i507.ArchiveCategoryUseCase(gh<_i11.LedgerRepository>()),
     );
     gh.lazySingleton<_i507.RestoreCategoryUseCase>(
       () => _i507.RestoreCategoryUseCase(gh<_i11.LedgerRepository>()),
+    );
+    gh.lazySingleton<_i146.CreateAccountUseCase>(
+      () => _i146.CreateAccountUseCase(gh<_i11.LedgerRepository>()),
     );
     gh.lazySingleton<_i188.CreateCategoryUseCase>(
       () => _i188.CreateCategoryUseCase(gh<_i11.LedgerRepository>()),
@@ -172,12 +212,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1058.GetTransactionsUseCase>(
       () => _i1058.GetTransactionsUseCase(gh<_i11.LedgerRepository>()),
     );
+    gh.lazySingleton<_i426.UpdateAccountUseCase>(
+      () => _i426.UpdateAccountUseCase(gh<_i11.LedgerRepository>()),
+    );
     gh.factory<_i784.AddTransferCubit>(
       () => _i784.AddTransferCubit(
         gh<_i326.GetAccountsUseCase>(),
         gh<_i501.GetTagsUseCase>(),
         gh<_i283.CreateTransferUseCase>(),
       ),
+    );
+    gh.lazySingleton<_i384.SubscriptionRepository>(
+      () => _i944.SubscriptionRepositoryImpl(gh<_i22.SubscriptionApiClient>()),
     );
     gh.lazySingleton<_i52.CheckAuthStatusUseCase>(
       () => _i52.CheckAuthStatusUseCase(gh<_i787.AuthRepository>()),
@@ -212,9 +258,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i395.CreateCategoryCubit>(
       () => _i395.CreateCategoryCubit(gh<_i188.CreateCategoryUseCase>()),
     );
-    gh.factory<_i660.TransactionListCubit>(
-      () => _i660.TransactionListCubit(
-        gh<_i417.GetTransactionsByCategoryUseCase>(),
+    gh.factory<_i444.CreateAccountCubit>(
+      () => _i444.CreateAccountCubit(gh<_i146.CreateAccountUseCase>()),
+    );
+    gh.factory<_i718.AccountSettingsCubit>(
+      () => _i718.AccountSettingsCubit(
+        gh<_i326.GetAccountsUseCase>(),
+        gh<_i292.ArchiveAccountUseCase>(),
+        gh<_i292.RestoreAccountUseCase>(),
+        gh<_i426.UpdateAccountUseCase>(),
       ),
     );
     gh.lazySingleton<_i52.AuthCubit>(
@@ -224,10 +276,42 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i17.GetCurrentUserUseCase>(),
         gh<_i52.CheckAuthStatusUseCase>(),
         gh<_i702.AuthEventBus>(),
+        gh<_i787.AuthRepository>(),
+      ),
+    );
+    gh.factory<_i660.TransactionListCubit>(
+      () => _i660.TransactionListCubit(
+        gh<_i417.GetTransactionsByCategoryUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i33.CreateSubscriptionUseCase>(
+      () => _i33.CreateSubscriptionUseCase(gh<_i384.SubscriptionRepository>()),
+    );
+    gh.lazySingleton<_i170.DeleteSubscriptionUseCase>(
+      () => _i170.DeleteSubscriptionUseCase(gh<_i384.SubscriptionRepository>()),
+    );
+    gh.lazySingleton<_i607.GetSubscriptionsUseCase>(
+      () => _i607.GetSubscriptionsUseCase(gh<_i384.SubscriptionRepository>()),
+    );
+    gh.lazySingleton<_i990.ToggleSubscriptionUseCase>(
+      () => _i990.ToggleSubscriptionUseCase(gh<_i384.SubscriptionRepository>()),
+    );
+    gh.factory<_i978.SubscriptionListCubit>(
+      () => _i978.SubscriptionListCubit(
+        gh<_i607.GetSubscriptionsUseCase>(),
+        gh<_i990.ToggleSubscriptionUseCase>(),
+        gh<_i170.DeleteSubscriptionUseCase>(),
       ),
     );
     gh.factory<_i281.LoginCubit>(
       () => _i281.LoginCubit(gh<_i188.LoginUseCase>(), gh<_i52.AuthCubit>()),
+    );
+    gh.factory<_i843.AddSubscriptionCubit>(
+      () => _i843.AddSubscriptionCubit(
+        gh<_i326.GetAccountsUseCase>(),
+        gh<_i549.GetCategoriesUseCase>(),
+        gh<_i33.CreateSubscriptionUseCase>(),
+      ),
     );
     return this;
   }

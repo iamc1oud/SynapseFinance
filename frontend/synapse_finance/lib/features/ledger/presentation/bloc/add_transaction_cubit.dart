@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/create_expense_usecase.dart';
@@ -27,7 +26,7 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
   Future<void> loadData() async {
     emit(state.copyWith(status: AddTransactionStatus.loading));
 
-    final accountsResult = await _getAccountsUseCase(const NoParams());
+    final accountsResult = await _getAccountsUseCase(const GetAccountsParams());
     final categoriesResult = await _getCategoriesUseCase(
       GetCategoriesParams(categoryType: _typeString(state.transactionType)),
     );

@@ -16,6 +16,14 @@ class CreateAccountRequest(Schema):
     icon: str = ""
 
 
+class UpdateAccountRequest(Schema):
+    """Update an existing financial account."""
+    name: Optional[str] = None
+    account_type: Optional[str] = None
+    currency: Optional[str] = None
+    icon: Optional[str] = None
+
+
 class AccountResponse(Schema):
     id: int
     name: str

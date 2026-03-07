@@ -1,17 +1,18 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://192.168.1.15:8000/api';
+  static const String baseUrl =
+      'https://goldfish-able-viper.ngrok-free.app/api';
 
   // Auth endpoints
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';
-  static const String user = '/auth/user';
+  static const String user = '/auth/me';
 
   // Ledger endpoints
-  static const String accounts = '/ledger/accounts';
+  static const String accounts = '/ledger/accounts/';
   static const String categories = '/ledger/categories';
   static const String tags = '/ledger/tags';
   static const String transactions = '/ledger/transactions';
@@ -22,6 +23,9 @@ class ApiConstants {
       '/ledger/transactions/spending-by-category';
   static const String transactionsByCategory =
       '/ledger/transactions/by-category';
+
+  // Subscription endpoints
+  static const String subscriptions = '/subscriptions/';
 
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 30);

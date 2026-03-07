@@ -17,10 +17,66 @@ class LedgerApiClient {
 
   LedgerApiClient(this._dio);
 
-  Future<List<AccountModel>> getAccounts() async {
-    final response = await _dio.get(ApiConstants.accounts);
+  Future<List<AccountModel>> getAccounts({bool? isActive}) async {
+    final response = await _dio.get(
+      ApiConstants.accounts,
+      queryParameters: isActive != null ? {'is_active': isActive} : null,
+    );
     final list = response.data as List<dynamic>;
     return list.map((e) => AccountModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<AccountModel> createAccount({
+    required String name,
+    required String accountType,
+    required double balance,
+    required String currency,
+    required String icon,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      ApiConstants.accounts,
+      data: {
+        'name': name,
+        'account_type': accountType,
+        'balance': balance.toStringAsFixed(2),
+        'currency': currency,
+        'icon': icon,
+      },
+    );
+    return AccountModel.fromJson(response.data!);
+  }
+
+  Future<AccountModel> updateAccount(
+    int id, {
+    String? name,
+    String? accountType,
+    String? currency,
+    String? icon,
+  }) async {
+    final data = <String, dynamic>{};
+    if (name != null) data['name'] = name;
+    if (accountType != null) data['account_type'] = accountType;
+    if (currency != null) data['currency'] = currency;
+    if (icon != null) data['icon'] = icon;
+    final response = await _dio.patch<Map<String, dynamic>>(
+      '${ApiConstants.accounts}/$id',
+      data: data,
+    );
+    return AccountModel.fromJson(response.data!);
+  }
+
+  Future<AccountModel> archiveAccount(int id) async {
+    final response = await _dio.patch<Map<String, dynamic>>(
+      '${ApiConstants.accounts}/$id/archive',
+    );
+    return AccountModel.fromJson(response.data!);
+  }
+
+  Future<AccountModel> restoreAccount(int id) async {
+    final response = await _dio.patch<Map<String, dynamic>>(
+      '${ApiConstants.accounts}/$id/restore',
+    );
+    return AccountModel.fromJson(response.data!);
   }
 
   Future<List<CategoryModel>> getCategories({String? categoryType}) async {

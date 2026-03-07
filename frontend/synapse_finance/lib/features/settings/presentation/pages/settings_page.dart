@@ -5,7 +5,9 @@ import '../../../../core/theme/theme_cubit.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import 'account_settings_page.dart';
 import 'category_settings_page.dart';
+import 'personal_information_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -80,18 +82,17 @@ class _SettingsPageState extends State<SettingsPage> {
                     iconBg: const Color(0xFF1E6FDB),
                     icon: Icons.person_outline_rounded,
                     label: 'Personal Information',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const PersonalInformationPage(),
+                      ),
+                    ),
                   ),
                   _SettingsRow(
                     iconBg: const Color(0xFF7C3AED),
                     icon: Icons.credit_card_rounded,
                     label: 'Subscription Plan',
                     trailing: 'AI Premium',
-                  ),
-                  _SettingsRow(
-                    iconBg: const Color(0xFF059669),
-                    icon: Icons.layers_rounded,
-                    label: 'Data Export & Backup',
-                    isLast: true,
                   ),
                 ],
               ),
@@ -114,9 +115,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     label: 'Income Category Settings',
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => const CategorySettingsPage(
-                          categoryType: 'income',
-                        ),
+                        builder: (_) =>
+                            const CategorySettingsPage(categoryType: 'income'),
                       ),
                     ),
                   ),
@@ -126,9 +126,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     label: 'Expense Category Settings',
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => const CategorySettingsPage(
-                          categoryType: 'expense',
-                        ),
+                        builder: (_) =>
+                            const CategorySettingsPage(categoryType: 'expense'),
                       ),
                     ),
                   ),
@@ -136,7 +135,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     iconBg: const Color(0xFF059669),
                     icon: Icons.account_balance,
                     label: 'Account Settings',
-                    isLast: true,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AccountSettingsPage(),
+                      ),
+                    ),
                   ),
                   _SettingsRow(
                     iconBg: const Color(0xFF059669),
@@ -275,6 +278,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final name = user?.fullName ?? 'Guest';
     final email = user?.email ?? '';
     final initials = _initials(name);
+    final avatarUrl = user?.avatarUrl;
+    final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
 
     return Center(
       child: Column(
@@ -282,20 +287,28 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 8),
           Stack(
             children: [
-              CircleAvatar(
-                radius: 44,
-                backgroundColor: const Color(
-                  0xFF4ADE80,
-                ).withValues(alpha: 0.15),
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4ADE80),
-                  ),
-                ),
-              ),
+              hasAvatar
+                  ? CircleAvatar(
+                      radius: 44,
+                      backgroundColor: const Color(
+                        0xFF4ADE80,
+                      ).withValues(alpha: 0.15),
+                      backgroundImage: NetworkImage(avatarUrl),
+                    )
+                  : CircleAvatar(
+                      radius: 44,
+                      backgroundColor: const Color(
+                        0xFF4ADE80,
+                      ).withValues(alpha: 0.15),
+                      child: Text(
+                        initials,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF4ADE80),
+                        ),
+                      ),
+                    ),
               Positioned(
                 bottom: 2,
                 right: 2,

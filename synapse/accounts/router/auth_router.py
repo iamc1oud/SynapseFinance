@@ -26,6 +26,7 @@ from ..schemas import (
     RefreshTokenRequest,
     RegisterRequest,
     TokenResponse,
+    UpdateProfileRequest,
     UserResponse,
 )
 
@@ -120,3 +121,20 @@ def logout_all(request):
 def get_current_user(request):
     """Get the current authenticated user's details."""
     return 200, UserResponse.from_user(request.auth)
+
+
+@router.patch("/me", response={200: UserResponse}, auth=JWTAuth())
+def update_profile(request, payload: UpdateProfileRequest):
+    """Update the current user's profile information."""
+    user = request.auth
+    update_fields = []
+    for field in ("first_name", "last_name", "avatar_url"):
+        value = getattr(payload, field)
+        if value is not None:
+            setattr(user, field, value)
+            update_fields.append(field)
+
+    if update_fields:
+        user.save(update_fields=update_fields)
+
+    return 200, UserResponse.from_user(user)

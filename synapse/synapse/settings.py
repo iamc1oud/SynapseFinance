@@ -35,7 +35,8 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 # Application definition
 CORE_APPS = [
     'accounts',
-    'ledger'
+    'ledger',
+    'subscriptions',
 ]
 
 PLUGINS = [

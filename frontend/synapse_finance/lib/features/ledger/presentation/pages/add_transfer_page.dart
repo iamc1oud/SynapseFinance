@@ -82,224 +82,280 @@ class _AddTransferPageState extends State<AddTransferPage> {
               ),
             ),
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 24),
-                Center(
-                  child: Text(
-                    'TRANSFER AMOUNT',
-                    style: TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 1.2,
-                      color: c.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+          resizeToAvoidBottomInset: false,
+          body: _buildBody(context, state, cubit, c),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    AddTransferState state,
+    AddTransferCubit cubit,
+    AppColorScheme c,
+  ) {
+    final amountDisplay = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        children: [
+          Text(
+            'TRANSFER AMOUNT',
+            style: TextStyle(
+              fontSize: 11,
+              letterSpacing: 1.2,
+              color: c.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '\$',
+                style: TextStyle(
+                  fontSize: 28,
+                  color: c.primary,
+                  fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(height: 8),
-                Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '\$',
-                        style: TextStyle(
-                          fontSize: 28,
-                          color: c.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        state.amountInput == '0' ? '0.00' : state.amountInput,
-                        style: TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: c.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                state.amountInput == '0' ? '0.00' : state.amountInput,
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: c.textPrimary,
                 ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
 
-                const SizedBox(height: 24),
-
-                if (state.status == AddTransferStatus.loading)
-                  Center(
-                    child: CircularProgressIndicator(color: c.primary),
-                  )
-                else ...[
-                  _AccountCard(
-                    label: 'FROM ACCOUNT',
-                    account: state.fromAccount,
-                    accounts: state.accounts,
-                    icon: Icons.account_balance,
-                    onSelected: cubit.selectFromAccount,
-                  ),
-
-                  Center(
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: c.primary,
-                      ),
-                      child: Icon(
-                        Icons.arrow_downward,
-                        size: 20,
-                        color: c.background,
-                      ),
-                    ),
-                  ),
-
-                  _AccountCard(
-                    label: 'TO ACCOUNT',
-                    account: state.toAccount,
-                    accounts: state.accounts,
-                    icon: Icons.savings,
-                    onSelected: cubit.selectToAccount,
-                  ),
-                ],
-
-                const SizedBox(height: 16),
-
-                _InfoRow(
-                  icon: Icons.calendar_today_outlined,
-                  label: 'DATE',
-                  value: DateFormat('EEEE, MMM d yyyy').format(state.selectedDate),
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: state.selectedDate,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime.now().add(const Duration(days: 365)),
-                    );
-                    if (date != null) cubit.selectDate(date);
-                  },
-                ),
-
-                const SizedBox(height: 12),
-
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    final accountsSection = state.status == AddTransferStatus.loading
+        ? Center(child: CircularProgressIndicator(color: c.primary))
+        : Column(
+            children: [
+              _AccountCard(
+                label: 'FROM ACCOUNT',
+                account: state.fromAccount,
+                accounts: state.accounts,
+                icon: Icons.account_balance,
+                onSelected: cubit.selectFromAccount,
+              ),
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: c.surface,
-                    borderRadius: BorderRadius.circular(12),
+                    shape: BoxShape.circle,
+                    color: c.primary,
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.description_outlined,
-                        size: 20,
-                        color: c.textSecondary,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _noteController,
-                          onChanged: cubit.updateNote,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: c.textPrimary,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Add a note...',
-                            hintStyle: TextStyle(
-                              color: c.textHint,
-                              fontSize: 14,
-                            ),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: Icon(
+                    Icons.arrow_downward,
+                    size: 20,
+                    color: c.background,
                   ),
                 ),
+              ),
+              _AccountCard(
+                label: 'TO ACCOUNT',
+                account: state.toAccount,
+                accounts: state.accounts,
+                icon: Icons.savings,
+                onSelected: cubit.selectToAccount,
+              ),
+            ],
+          );
 
-                if (state.tags.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  Text(
-                    'QUICK TAGS',
-                    style: TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 1.2,
-                      color: c.textSecondary,
-                      fontWeight: FontWeight.w600,
+    final detailsSection = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _InfoRow(
+            icon: Icons.calendar_today_outlined,
+            label: 'DATE',
+            value: DateFormat('EEEE, MMM d yyyy').format(state.selectedDate),
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: state.selectedDate,
+                firstDate: DateTime(2020),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (date != null) cubit.selectDate(date);
+            },
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: c.surface,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.description_outlined,
+                  size: 20,
+                  color: c.textSecondary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _noteController,
+                    onChanged: cubit.updateNote,
+                    style: TextStyle(fontSize: 14, color: c.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Add a note...',
+                      hintStyle: TextStyle(color: c.textHint, fontSize: 14),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      filled: false,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                      isDense: true,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: state.tags.map((tag) {
-                      final isSelected = state.selectedTagIds.contains(tag.id);
-                      return _TagChip(
-                        tag: tag,
-                        isSelected: isSelected,
-                        onTap: () => cubit.toggleTag(tag.id),
-                      );
-                    }).toList(),
-                  ),
-                ],
-
-                const SizedBox(height: 24),
-
-                NumberPad(
-                  onDigit: cubit.inputDigit,
-                  onDelete: cubit.deleteDigit,
                 ),
-
-                const SizedBox(height: 16),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: state.status == AddTransferStatus.saving
-                        ? null
-                        : cubit.confirm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: c.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: state.status == AddTransferStatus.saving
-                        ? SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: c.background,
-                            ),
-                          )
-                        : Text(
-                            'Confirm Transfer',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: c.background,
-                            ),
-                          ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
               ],
             ),
           ),
+          if (state.tags.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Text(
+              'QUICK TAGS',
+              style: TextStyle(
+                fontSize: 11,
+                letterSpacing: 1.2,
+                color: c.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: state.tags.map((tag) {
+                final isSelected = state.selectedTagIds.contains(tag.id);
+                return _TagChip(
+                  tag: tag,
+                  isSelected: isSelected,
+                  onTap: () => cubit.toggleTag(tag.id),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    final numPad = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: NumberPad(onDigit: cubit.inputDigit, onDelete: cubit.deleteDigit),
+    );
+
+    final confirmButton = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          onPressed:
+              state.status == AddTransferStatus.saving ? null : cubit.confirm,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: c.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: state.status == AddTransferStatus.saving
+              ? SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: c.background,
+                  ),
+                )
+              : Text(
+                  'Confirm Transfer',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: c.background,
+                  ),
+                ),
+        ),
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        // Tablet / large screen: side-by-side layout
+        if (constraints.maxWidth >= 700) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      amountDisplay,
+                      accountsSection,
+                      const SizedBox(height: 16),
+                      detailsSection,
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ),
+              VerticalDivider(width: 1, thickness: 1, color: c.border),
+              SizedBox(
+                width: 360,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Spacer(),
+                    numPad,
+                    confirmButton,
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+
+        // Phone / portrait layout — top content scrollable, numpad pinned at bottom
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    amountDisplay,
+                    accountsSection,
+                    const SizedBox(height: 16),
+                    detailsSection,
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+            ),
+            numPad,
+            confirmButton,
+          ],
         );
       },
     );
