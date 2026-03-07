@@ -125,11 +125,13 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, User>> updateProfile({
     String? firstName,
     String? lastName,
+    String? avatarUrl,
   }) async {
     try {
       final body = <String, dynamic>{};
       if (firstName != null) body['first_name'] = firstName;
       if (lastName != null) body['last_name'] = lastName;
+      if (avatarUrl != null) body['avatar_url'] = avatarUrl;
 
       final user = await _apiClient.updateProfile(body);
       await _localDataSource.cacheUser(user);

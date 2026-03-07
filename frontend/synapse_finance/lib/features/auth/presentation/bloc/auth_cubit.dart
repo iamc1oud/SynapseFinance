@@ -130,10 +130,12 @@ class AuthCubit extends Cubit<AuthState> {
   Future<String?> updateProfile({
     String? firstName,
     String? lastName,
+    String? avatarUrl,
   }) async {
     final result = await _authRepository.updateProfile(
       firstName: firstName,
       lastName: lastName,
+      avatarUrl: avatarUrl,
     );
 
     return result.fold(

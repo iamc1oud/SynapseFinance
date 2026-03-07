@@ -11,6 +11,7 @@ class UserModel extends User {
     @JsonKey(name: 'email') super.email,
     @JsonKey(name: 'first_name') super.firstName,
     @JsonKey(name: 'last_name') super.lastName,
+    @JsonKey(name: 'avatar_url') super.avatarUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -23,5 +24,6 @@ class UserModel extends User {
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
+    avatarUrl: user.avatarUrl,
   );
 }

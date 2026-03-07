@@ -128,7 +128,7 @@ def update_profile(request, payload: UpdateProfileRequest):
     """Update the current user's profile information."""
     user = request.auth
     update_fields = []
-    for field in ("first_name", "last_name"):
+    for field in ("first_name", "last_name", "avatar_url"):
         value = getattr(payload, field)
         if value is not None:
             setattr(user, field, value)

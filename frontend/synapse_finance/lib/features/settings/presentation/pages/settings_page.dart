@@ -278,6 +278,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final name = user?.fullName ?? 'Guest';
     final email = user?.email ?? '';
     final initials = _initials(name);
+    final avatarUrl = user?.avatarUrl;
+    final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
 
     return Center(
       child: Column(
@@ -285,20 +287,28 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 8),
           Stack(
             children: [
-              CircleAvatar(
-                radius: 44,
-                backgroundColor: const Color(
-                  0xFF4ADE80,
-                ).withValues(alpha: 0.15),
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4ADE80),
-                  ),
-                ),
-              ),
+              hasAvatar
+                  ? CircleAvatar(
+                      radius: 44,
+                      backgroundColor: const Color(
+                        0xFF4ADE80,
+                      ).withValues(alpha: 0.15),
+                      backgroundImage: NetworkImage(avatarUrl),
+                    )
+                  : CircleAvatar(
+                      radius: 44,
+                      backgroundColor: const Color(
+                        0xFF4ADE80,
+                      ).withValues(alpha: 0.15),
+                      child: Text(
+                        initials,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF4ADE80),
+                        ),
+                      ),
+                    ),
               Positioned(
                 bottom: 2,
                 right: 2,

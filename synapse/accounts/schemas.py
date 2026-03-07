@@ -38,6 +38,7 @@ class UserResponse(Schema):
     email: str
     first_name: str
     last_name: str
+    avatar_url: str
     is_active: bool
 
     @staticmethod
@@ -47,6 +48,7 @@ class UserResponse(Schema):
             email=user.email,
             first_name=user.first_name,
             last_name=user.last_name,
+            avatar_url=user.avatar_url,
             is_active=user.is_active,
         )
 
@@ -63,6 +65,7 @@ class MessageResponse(Schema):
 class UpdateProfileRequest(Schema):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 
 class ErrorResponse(Schema):

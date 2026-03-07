@@ -1,7 +1,8 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://192.168.1.15:8000/api';
+  static const String baseUrl =
+      'https://goldfish-able-viper.ngrok-free.app/api';
 
   // Auth endpoints
   static const String login = '/auth/login';

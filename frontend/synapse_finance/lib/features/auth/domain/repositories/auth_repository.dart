@@ -26,5 +26,6 @@ abstract class AuthRepository {
   Future<Either<Failure, User>> updateProfile({
     String? firstName,
     String? lastName,
+    String? avatarUrl,
   });
 }
