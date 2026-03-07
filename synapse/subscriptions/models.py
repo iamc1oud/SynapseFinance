@@ -54,4 +54,4 @@ class Subscription(models.Model):
         ordering = ["next_due_date"]
 
     def __str__(self):
-        return f"{self.name} - {self.amount} ({self.get_frequency_display()})"
+        return f"{self.name} - {self.amount} ({self.get_frequency_display()})"  # ty:ignore[unresolved-attribute]
