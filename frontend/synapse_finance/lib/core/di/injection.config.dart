@@ -77,6 +77,14 @@ import '../../features/ledger/presentation/bloc/create_category_cubit.dart'
     as _i395;
 import '../../features/ledger/presentation/bloc/transaction_list_cubit.dart'
     as _i660;
+import '../../features/settings/data/datasources/currency_api_client.dart'
+    as _i1055;
+import '../../features/settings/data/repositories/currency_repository_impl.dart'
+    as _i575;
+import '../../features/settings/domain/repositories/currency_repository.dart'
+    as _i44;
+import '../../features/settings/domain/usecases/get_user_currencies_usecase.dart'
+    as _i165;
 import '../../features/subscriptions/data/datasources/subscription_api_client.dart'
     as _i22;
 import '../../features/subscriptions/data/repositories/subscription_repository_impl.dart'
@@ -154,6 +162,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i881.LedgerApiClient>(
       () => _i881.LedgerApiClient(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i1055.CurrencyApiClient>(
+      () => _i1055.CurrencyApiClient(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i22.SubscriptionApiClient>(
       () => _i22.SubscriptionApiClient(gh<_i361.Dio>()),
     );
@@ -166,6 +177,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i11.LedgerRepository>(
       () => _i321.LedgerRepositoryImpl(gh<_i881.LedgerApiClient>()),
+    );
+    gh.lazySingleton<_i44.CurrencyRepository>(
+      () => _i575.CurrencyRepositoryImpl(gh<_i1055.CurrencyApiClient>()),
     );
     gh.lazySingleton<_i292.ArchiveAccountUseCase>(
       () => _i292.ArchiveAccountUseCase(gh<_i11.LedgerRepository>()),
@@ -247,14 +261,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i507.RestoreCategoryUseCase>(),
       ),
     );
-    gh.factory<_i99.AddTransactionCubit>(
-      () => _i99.AddTransactionCubit(
-        gh<_i326.GetAccountsUseCase>(),
-        gh<_i549.GetCategoriesUseCase>(),
-        gh<_i1031.CreateExpenseUseCase>(),
-        gh<_i1038.CreateIncomeUseCase>(),
-      ),
-    );
     gh.factory<_i395.CreateCategoryCubit>(
       () => _i395.CreateCategoryCubit(gh<_i188.CreateCategoryUseCase>()),
     );
@@ -279,9 +285,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i787.AuthRepository>(),
       ),
     );
+    gh.lazySingleton<_i165.GetUserCurrenciesUseCase>(
+      () => _i165.GetUserCurrenciesUseCase(gh<_i44.CurrencyRepository>()),
+    );
     gh.factory<_i660.TransactionListCubit>(
       () => _i660.TransactionListCubit(
         gh<_i417.GetTransactionsByCategoryUseCase>(),
+      ),
+    );
+    gh.factory<_i99.AddTransactionCubit>(
+      () => _i99.AddTransactionCubit(
+        gh<_i326.GetAccountsUseCase>(),
+        gh<_i549.GetCategoriesUseCase>(),
+        gh<_i1031.CreateExpenseUseCase>(),
+        gh<_i1038.CreateIncomeUseCase>(),
+        gh<_i165.GetUserCurrenciesUseCase>(),
       ),
     );
     gh.lazySingleton<_i33.CreateSubscriptionUseCase>(
@@ -296,6 +314,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i990.ToggleSubscriptionUseCase>(
       () => _i990.ToggleSubscriptionUseCase(gh<_i384.SubscriptionRepository>()),
     );
+    gh.factory<_i843.AddSubscriptionCubit>(
+      () => _i843.AddSubscriptionCubit(
+        gh<_i326.GetAccountsUseCase>(),
+        gh<_i549.GetCategoriesUseCase>(),
+        gh<_i33.CreateSubscriptionUseCase>(),
+        gh<_i165.GetUserCurrenciesUseCase>(),
+      ),
+    );
     gh.factory<_i978.SubscriptionListCubit>(
       () => _i978.SubscriptionListCubit(
         gh<_i607.GetSubscriptionsUseCase>(),
@@ -305,13 +331,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i281.LoginCubit>(
       () => _i281.LoginCubit(gh<_i188.LoginUseCase>(), gh<_i52.AuthCubit>()),
-    );
-    gh.factory<_i843.AddSubscriptionCubit>(
-      () => _i843.AddSubscriptionCubit(
-        gh<_i326.GetAccountsUseCase>(),
-        gh<_i549.GetCategoriesUseCase>(),
-        gh<_i33.CreateSubscriptionUseCase>(),
-      ),
     );
     return this;
   }

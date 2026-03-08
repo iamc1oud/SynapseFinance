@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../settings/domain/entities/sub_currency.dart';
 import '../../domain/entities/account.dart';
 import '../bloc/add_transaction_cubit.dart';
 import '../bloc/add_transaction_state.dart';
@@ -31,6 +32,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
   String _savedLabel = '';
   String _savedAmount = '';
   String _savedTitle = '';
+  String _savedCurrency = 'USD';
 
   @override
   void initState() {
@@ -75,6 +77,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
           (isExpense ? 'EXPENSE' : 'INCOME');
       _savedAmount = _formatAmount(state.displayAmount);
       _savedTitle = isExpense ? 'Expense Recorded!' : 'Income Recorded!';
+      _savedCurrency = state.currencyLabel;
     });
     _checkController.forward();
     _pulseController.repeat();
@@ -118,6 +121,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
             title: _savedTitle,
             label: _savedLabel,
             amount: _savedAmount,
+            currency: _savedCurrency,
             checkScale: _checkScale,
             fadeIn: _fadeIn,
             pulseController: _pulseController,
@@ -181,7 +185,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       ),
     );
 
-    final amountDisplay = _AmountDisplay(amount: state.displayAmount);
+    final amountDisplay = _AmountDisplay(
+      amount: state.displayAmount,
+      currency: state.currencyLabel,
+    );
 
     final categorySection = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,6 +241,21 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
+          if (state.availableCurrencies.length > 1)
+            _InfoRow(
+              icon: Icons.currency_exchange,
+              label: 'CURRENCY',
+              value: state.currencyLabel,
+              onTap: () => _showCurrencyPicker(
+                context,
+                c,
+                currencies: state.availableCurrencies,
+                selected: state.currencyLabel,
+                onSelected: cubit.selectCurrency,
+              ),
+            ),
+          if (state.availableCurrencies.length > 1)
+            const SizedBox(height: 8),
           _InfoRow(
             icon: Icons.account_balance_wallet_outlined,
             label: 'ACCOUNT',
@@ -381,6 +403,7 @@ class _SuccessScreen extends StatelessWidget {
   final String title;
   final String label;
   final String amount;
+  final String currency;
   final Animation<double> checkScale;
   final Animation<double> fadeIn;
   final AnimationController pulseController;
@@ -391,6 +414,7 @@ class _SuccessScreen extends StatelessWidget {
     required this.title,
     required this.label,
     required this.amount,
+    required this.currency,
     required this.checkScale,
     required this.fadeIn,
     required this.pulseController,
@@ -488,7 +512,7 @@ class _SuccessScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '\$$amount',
+                        '$currency $amount',
                         style: TextStyle(
                           fontSize: 42,
                           fontWeight: FontWeight.bold,
@@ -645,12 +669,23 @@ class _PulseRing extends StatelessWidget {
 
 class _AmountDisplay extends StatelessWidget {
   final String amount;
+  final String currency;
 
-  const _AmountDisplay({required this.amount});
+  const _AmountDisplay({required this.amount, required this.currency});
+
+  static const _currencySymbols = {
+    'USD': '\$',
+    'EUR': '\u20AC',
+    'GBP': '\u00A3',
+    'JPY': '\u00A5',
+    'CAD': 'C\$',
+    'INR': '\u20B9',
+  };
 
   @override
   Widget build(BuildContext context) {
     final c = context.appColors;
+    final symbol = _currencySymbols[currency] ?? currency;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
@@ -671,7 +706,7 @@ class _AmountDisplay extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                '\$',
+                symbol,
                 style: TextStyle(
                   fontSize: 32,
                   color: c.primary,
@@ -789,6 +824,58 @@ void _showAccountPicker(
                 : null,
             onTap: () {
               onSelected(a);
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showCurrencyPicker(
+  BuildContext context,
+  AppColorScheme c, {
+  required List<SubCurrency> currencies,
+  required String selected,
+  required ValueChanged<String> onSelected,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: c.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => ListView(
+      shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            'Select Currency',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: c.textPrimary,
+            ),
+          ),
+        ),
+        ...currencies.map(
+          (sc) => ListTile(
+            leading: Icon(Icons.currency_exchange, color: c.primary),
+            title: Text(
+              sc.currency,
+              style: TextStyle(color: c.textPrimary),
+            ),
+            subtitle: sc.isMain
+                ? Text('Main currency', style: TextStyle(color: c.textSecondary, fontSize: 12))
+                : null,
+            trailing: sc.currency == selected
+                ? Icon(Icons.check_circle, color: c.primary, size: 20)
+                : null,
+            onTap: () {
+              onSelected(sc.currency);
               Navigator.pop(context);
             },
           ),

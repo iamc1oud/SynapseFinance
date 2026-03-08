@@ -24,6 +24,9 @@ class ApiConstants {
   static const String transactionsByCategory =
       '/ledger/transactions/by-category';
 
+  // Currency endpoints
+  static const String userCurrencies = '/currencies/user';
+
   // Subscription endpoints
   static const String subscriptions = '/subscriptions/';
 

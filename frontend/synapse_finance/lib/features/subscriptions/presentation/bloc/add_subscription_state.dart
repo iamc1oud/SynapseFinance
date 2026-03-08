@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../ledger/domain/entities/account.dart';
 import '../../../ledger/domain/entities/category.dart';
+import '../../../settings/domain/entities/sub_currency.dart';
 import '../../domain/entities/subscription.dart';
 
 enum AddSubscriptionStatus { initial, loading, saving, saved, error }
@@ -12,6 +13,7 @@ class AddSubscriptionState extends Equatable {
   final String amountInput;
   final String currency;
   final String frequency;
+  final List<SubCurrency> availableCurrencies;
   final int? customIntervalDays;
   final List<Account> accounts;
   final Account? selectedAccount;
@@ -32,6 +34,7 @@ class AddSubscriptionState extends Equatable {
     this.amountInput = '',
     this.currency = 'USD',
     this.frequency = 'monthly',
+    this.availableCurrencies = const [],
     this.customIntervalDays,
     this.accounts = const [],
     this.selectedAccount,
@@ -58,6 +61,7 @@ class AddSubscriptionState extends Equatable {
     String? amountInput,
     String? currency,
     String? frequency,
+    List<SubCurrency>? availableCurrencies,
     int? customIntervalDays,
     bool clearCustomInterval = false,
     List<Account>? accounts,
@@ -83,6 +87,7 @@ class AddSubscriptionState extends Equatable {
       amountInput: amountInput ?? this.amountInput,
       currency: currency ?? this.currency,
       frequency: frequency ?? this.frequency,
+      availableCurrencies: availableCurrencies ?? this.availableCurrencies,
       customIntervalDays: clearCustomInterval
           ? null
           : (customIntervalDays ?? this.customIntervalDays),
@@ -112,6 +117,7 @@ class AddSubscriptionState extends Equatable {
         amountInput,
         currency,
         frequency,
+        availableCurrencies,
         customIntervalDays,
         accounts,
         selectedAccount,

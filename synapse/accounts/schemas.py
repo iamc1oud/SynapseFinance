@@ -70,3 +70,47 @@ class UpdateProfileRequest(Schema):
 
 class ErrorResponse(Schema):
     detail: str
+
+
+# ── Currency Schemas ────────────────────────────────────────────────────────
+
+class SubCurrencyResponse(Schema):
+    id: int
+    currency: str
+    exchange_rate: float
+    unit_position: str
+    is_main: bool = False
+
+    @staticmethod
+    def from_sub_currency(sub_currency, is_main=False):
+        return SubCurrencyResponse(
+            id=sub_currency.id,
+            currency=sub_currency.currency,
+            exchange_rate=float(sub_currency.exchange_rate),
+            unit_position=sub_currency.unit_position,
+            is_main=is_main,
+        )
+
+
+class UserCurrenciesResponse(Schema):
+    main_currency: SubCurrencyResponse
+    sub_currencies: list[SubCurrencyResponse]
+
+
+class ExchangeRateResponse(Schema):
+    base_currency: str
+    target_currency: str
+    rate: float
+
+    @staticmethod
+    def from_exchange_rate(er):
+        return ExchangeRateResponse(
+            base_currency=er.base_currency,
+            target_currency=er.target_currency,
+            rate=float(er.rate),
+        )
+
+
+class AddSubCurrencyRequest(Schema):
+    currency: str
+    unit_position: str = "front"

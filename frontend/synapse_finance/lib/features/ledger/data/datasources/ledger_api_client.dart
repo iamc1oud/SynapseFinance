@@ -127,15 +127,18 @@ class LedgerApiClient {
     required String date,
     required String note,
     required List<int> tagIds,
+    String? currency,
   }) async {
-    await _dio.post(ApiConstants.expenseTransaction, data: {
+    final data = <String, dynamic>{
       'amount': amount.toStringAsFixed(2),
       'account_id': accountId,
       'category_id': categoryId,
       'date': date,
       'note': note,
       'tag_ids': tagIds,
-    });
+    };
+    if (currency != null) data['currency'] = currency;
+    await _dio.post(ApiConstants.expenseTransaction, data: data);
   }
 
   Future<void> createIncome({
@@ -145,15 +148,18 @@ class LedgerApiClient {
     required String date,
     required String note,
     required List<int> tagIds,
+    String? currency,
   }) async {
-    await _dio.post(ApiConstants.incomeTransaction, data: {
+    final data = <String, dynamic>{
       'amount': amount.toStringAsFixed(2),
       'account_id': accountId,
       'category_id': categoryId,
       'date': date,
       'note': note,
       'tag_ids': tagIds,
-    });
+    };
+    if (currency != null) data['currency'] = currency;
+    await _dio.post(ApiConstants.incomeTransaction, data: data);
   }
 
   Future<void> createTransfer({

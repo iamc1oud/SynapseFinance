@@ -2,6 +2,7 @@ from datetime import date
 from typing import Optional
 
 from accounts.auth import JWTAuth
+from accounts.exchange_service import convert_amount
 from accounts.schemas import ErrorResponse, MessageResponse
 from django.db import transaction
 from django.db.models import F, Sum
@@ -41,14 +42,32 @@ def create_expense(request, payload: CreateExpenseRequest):
     except Category.DoesNotExist:
         return 400, ErrorResponse(detail="Expense category not found")
 
+    # Determine currency and conversion
+    txn_currency = payload.currency or account.currency
+    balance_amount = payload.amount
+    original_amount = None
+    exchange_rate_val = None
+
+    if txn_currency != account.currency:
+        result = convert_amount(payload.amount, txn_currency, account.currency)
+        if result is None:
+            return 400, ErrorResponse(
+                detail=f"Exchange rate not available for {txn_currency} to {account.currency}"
+            )
+        balance_amount, exchange_rate_val = result
+        original_amount = payload.amount
+
     with transaction.atomic():
         Account.objects.filter(id=account.pk).update(
-            balance=F('balance') - payload.amount,
+            balance=F('balance') - balance_amount,
         )
         txn = Transaction.objects.create(
             user=user,
             transaction_type='expense',
-            amount=payload.amount,
+            amount=balance_amount,
+            currency=txn_currency,
+            original_amount=original_amount,
+            exchange_rate=exchange_rate_val,
             account=account,
             category=category,
             note=payload.note,
@@ -83,14 +102,32 @@ def create_income(request, payload: CreateIncomeRequest):
     except Category.DoesNotExist:
         return 400, ErrorResponse(detail="Income category not found")
 
+    # Determine currency and conversion
+    txn_currency = payload.currency or account.currency
+    balance_amount = payload.amount
+    original_amount = None
+    exchange_rate_val = None
+
+    if txn_currency != account.currency:
+        result = convert_amount(payload.amount, txn_currency, account.currency)
+        if result is None:
+            return 400, ErrorResponse(
+                detail=f"Exchange rate not available for {txn_currency} to {account.currency}"
+            )
+        balance_amount, exchange_rate_val = result
+        original_amount = payload.amount
+
     with transaction.atomic():
         Account.objects.filter(id=account.pk).update(
-            balance=F('balance') + payload.amount,
+            balance=F('balance') + balance_amount,
         )
         txn = Transaction.objects.create(
             user=user,
             transaction_type='income',
-            amount=payload.amount,
+            amount=balance_amount,
+            currency=txn_currency,
+            original_amount=original_amount,
+            exchange_rate=exchange_rate_val,
             account=account,
             category=category,
             note=payload.note,

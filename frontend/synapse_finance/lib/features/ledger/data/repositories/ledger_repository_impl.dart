@@ -243,6 +243,7 @@ class LedgerRepositoryImpl implements LedgerRepository {
     required DateTime date,
     required String note,
     required List<int> tagIds,
+    String? currency,
   }) async {
     try {
       await _apiClient.createExpense(
@@ -252,6 +253,7 @@ class LedgerRepositoryImpl implements LedgerRepository {
         date: DateFormat('yyyy-MM-dd').format(date),
         note: note,
         tagIds: tagIds,
+        currency: currency,
       );
       return const Right(null);
     } on DioException catch (e) {
@@ -269,6 +271,7 @@ class LedgerRepositoryImpl implements LedgerRepository {
     required DateTime date,
     required String note,
     required List<int> tagIds,
+    String? currency,
   }) async {
     try {
       await _apiClient.createIncome(
@@ -278,6 +281,7 @@ class LedgerRepositoryImpl implements LedgerRepository {
         date: DateFormat('yyyy-MM-dd').format(date),
         note: note,
         tagIds: tagIds,
+        currency: currency,
       );
       return const Right(null);
     } on DioException catch (e) {

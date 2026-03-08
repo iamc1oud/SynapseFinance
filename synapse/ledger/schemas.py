@@ -99,6 +99,7 @@ class CreateExpenseRequest(Schema):
     date: date
     note: str = ""
     tag_ids: list[int] = []
+    currency: Optional[str] = None
 
 
 class CreateIncomeRequest(Schema):
@@ -109,6 +110,7 @@ class CreateIncomeRequest(Schema):
     date: date
     note: str = ""
     tag_ids: list[int] = []
+    currency: Optional[str] = None
 
 
 class CreateTransferRequest(Schema):
@@ -133,6 +135,9 @@ class TransactionResponse(Schema):
     id: int
     transaction_type: str
     amount: Decimal
+    currency: str
+    original_amount: Optional[Decimal] = None
+    exchange_rate: Optional[float] = None
     account: AccountResponse
     to_account: Optional[AccountResponse] = None
     category: Optional[CategoryResponse] = None
@@ -147,6 +152,9 @@ class TransactionResponse(Schema):
             id=txn.id,
             transaction_type=txn.transaction_type,
             amount=txn.amount,
+            currency=txn.currency,
+            original_amount=txn.original_amount,
+            exchange_rate=float(txn.exchange_rate) if txn.exchange_rate else None,
             account=AccountResponse.from_account(txn.account),
             to_account=(
                 AccountResponse.from_account(txn.to_account)

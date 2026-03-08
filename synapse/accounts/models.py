@@ -131,3 +131,19 @@ class AppPreference(models.Model):
 
     def __str__(self):
         return "Preferences for {}".format(self.user.email)
+
+
+class ExchangeRate(models.Model):
+    """Cached exchange rates fetched from external API, updated every 24h."""
+
+    base_currency = models.CharField(max_length=3)
+    target_currency = models.CharField(max_length=3)
+    rate = models.DecimalField(max_digits=15, decimal_places=7)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "exchange_rates"
+        unique_together = ("base_currency", "target_currency")
+
+    def __str__(self):
+        return f"{self.base_currency} -> {self.target_currency}: {self.rate}"

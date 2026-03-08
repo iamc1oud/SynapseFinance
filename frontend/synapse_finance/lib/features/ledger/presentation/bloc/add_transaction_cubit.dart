@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/usecases/usecase.dart';
+import '../../../settings/domain/usecases/get_user_currencies_usecase.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/create_expense_usecase.dart';
@@ -15,12 +17,14 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
   final GetCategoriesUseCase _getCategoriesUseCase;
   final CreateExpenseUseCase _createExpenseUseCase;
   final CreateIncomeUseCase _createIncomeUseCase;
+  final GetUserCurrenciesUseCase _getUserCurrenciesUseCase;
 
   AddTransactionCubit(
     this._getAccountsUseCase,
     this._getCategoriesUseCase,
     this._createExpenseUseCase,
     this._createIncomeUseCase,
+    this._getUserCurrenciesUseCase,
   ) : super(AddTransactionState(selectedDate: DateTime.now()));
 
   Future<void> loadData() async {
@@ -30,6 +34,7 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
     final categoriesResult = await _getCategoriesUseCase(
       GetCategoriesParams(categoryType: _typeString(state.transactionType)),
     );
+    final currenciesResult = await _getUserCurrenciesUseCase(const NoParams());
 
     accountsResult.fold(
       (failure) => emit(state.copyWith(
@@ -42,13 +47,21 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
             status: AddTransactionStatus.error,
             errorMessage: failure.message,
           )),
-          (categories) => emit(state.copyWith(
-            status: AddTransactionStatus.initial,
-            accounts: accounts,
-            selectedAccount: accounts.isNotEmpty ? accounts.first : null,
-            categories: categories,
-            clearError: true,
-          )),
+          (categories) {
+            final currencies = currenciesResult.fold((_) => state.availableCurrencies, (c) => c);
+            final mainCurrency = currencies.isNotEmpty
+                ? currencies.firstWhere((c) => c.isMain, orElse: () => currencies.first).currency
+                : null;
+            emit(state.copyWith(
+              status: AddTransactionStatus.initial,
+              accounts: accounts,
+              selectedAccount: accounts.isNotEmpty ? accounts.first : null,
+              categories: categories,
+              availableCurrencies: currencies,
+              selectedCurrency: mainCurrency,
+              clearError: true,
+            ));
+          },
         );
       },
     );
@@ -113,6 +126,10 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
     emit(state.copyWith(note: note));
   }
 
+  void selectCurrency(String currency) {
+    emit(state.copyWith(selectedCurrency: currency));
+  }
+
   Future<void> save() async {
     if (state.amount <= 0) {
       emit(state.copyWith(
@@ -138,6 +155,8 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
 
     emit(state.copyWith(status: AddTransactionStatus.saving, clearError: true));
 
+    final currency = state.selectedCurrency;
+
     final params = state.transactionType == TransactionType.expense
         ? CreateExpenseParams(
             amount: state.amount,
@@ -146,6 +165,7 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
             date: state.selectedDate,
             note: state.note,
             tagIds: state.selectedTagIds,
+            currency: currency,
           )
         : null;
 
@@ -157,6 +177,7 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
             date: state.selectedDate,
             note: state.note,
             tagIds: state.selectedTagIds,
+            currency: currency,
           )
         : null;
 

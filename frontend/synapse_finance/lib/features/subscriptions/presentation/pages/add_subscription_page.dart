@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../ledger/domain/entities/account.dart';
 import '../../../ledger/domain/entities/category.dart';
+import '../../../settings/domain/entities/sub_currency.dart';
 import '../bloc/add_subscription_cubit.dart';
 import '../bloc/add_subscription_state.dart';
 
@@ -132,6 +133,15 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                           _CurrencyChip(
                             currency: state.currency,
                             color: c,
+                            onTap: state.availableCurrencies.length > 1
+                                ? () => _showCurrencyPicker(
+                                      context,
+                                      c,
+                                      currencies: state.availableCurrencies,
+                                      selected: state.currency,
+                                      onSelected: cubit.setCurrency,
+                                    )
+                                : null,
                           ),
                         ],
                       ),
@@ -437,19 +447,25 @@ class _FrequencySelector extends StatelessWidget {
 class _CurrencyChip extends StatelessWidget {
   final String currency;
   final AppColorScheme color;
+  final VoidCallback? onTap;
 
-  const _CurrencyChip({required this.currency, required this.color});
+  const _CurrencyChip({required this.currency, required this.color, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: color.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: color.border.withValues(alpha: 0.5)),
       ),
-      child: Text(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
         currency,
         style: TextStyle(
           fontSize: 15,
@@ -457,8 +473,65 @@ class _CurrencyChip extends StatelessWidget {
           color: color.textPrimary,
         ),
       ),
+          if (onTap != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: Icon(Icons.arrow_drop_down, size: 18, color: color.textSecondary),
+            ),
+        ],
+      ),
+      ),
     );
   }
+}
+
+void _showCurrencyPicker(
+  BuildContext context,
+  AppColorScheme c, {
+  required List<SubCurrency> currencies,
+  required String selected,
+  required ValueChanged<String> onSelected,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: c.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => ListView(
+      shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            'Select Currency',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: c.textPrimary,
+            ),
+          ),
+        ),
+        ...currencies.map(
+          (sc) => ListTile(
+            leading: Icon(Icons.currency_exchange, color: c.primary),
+            title: Text(sc.currency, style: TextStyle(color: c.textPrimary)),
+            subtitle: sc.isMain
+                ? Text('Main currency', style: TextStyle(color: c.textSecondary, fontSize: 12))
+                : null,
+            trailing: sc.currency == selected
+                ? Icon(Icons.check_circle, color: c.primary, size: 20)
+                : null,
+            onTap: () {
+              onSelected(sc.currency);
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 // ─── Category picker ──────────────────────────────────────────────────────────

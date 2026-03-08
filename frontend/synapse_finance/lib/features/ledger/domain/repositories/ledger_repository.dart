@@ -61,6 +61,7 @@ abstract class LedgerRepository {
     required DateTime date,
     required String note,
     required List<int> tagIds,
+    String? currency,
   });
 
   Future<Either<Failure, void>> createIncome({
@@ -70,6 +71,7 @@ abstract class LedgerRepository {
     required DateTime date,
     required String note,
     required List<int> tagIds,
+    String? currency,
   });
 
   Future<Either<Failure, void>> createTransfer({

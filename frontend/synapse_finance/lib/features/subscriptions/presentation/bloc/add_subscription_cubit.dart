@@ -1,10 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/usecases/usecase.dart';
 import '../../../ledger/domain/entities/account.dart';
 import '../../../ledger/domain/entities/category.dart';
 import '../../../ledger/domain/usecases/get_accounts_usecase.dart';
 import '../../../ledger/domain/usecases/get_categories_usecase.dart';
+import '../../../settings/domain/usecases/get_user_currencies_usecase.dart';
 import '../../domain/usecases/create_subscription_usecase.dart';
 import 'add_subscription_state.dart';
 
@@ -13,11 +15,13 @@ class AddSubscriptionCubit extends Cubit<AddSubscriptionState> {
   final GetAccountsUseCase _getAccountsUseCase;
   final GetCategoriesUseCase _getCategoriesUseCase;
   final CreateSubscriptionUseCase _createSubscriptionUseCase;
+  final GetUserCurrenciesUseCase _getUserCurrenciesUseCase;
 
   AddSubscriptionCubit(
     this._getAccountsUseCase,
     this._getCategoriesUseCase,
     this._createSubscriptionUseCase,
+    this._getUserCurrenciesUseCase,
   ) : super(AddSubscriptionState(startDate: DateTime.now()));
 
   Future<void> loadData() async {
@@ -28,6 +32,7 @@ class AddSubscriptionCubit extends Cubit<AddSubscriptionState> {
     final categoriesResult = await _getCategoriesUseCase(
       const GetCategoriesParams(categoryType: 'expense'),
     );
+    final currenciesResult = await _getUserCurrenciesUseCase(const NoParams());
 
     accountsResult.fold(
       (failure) => emit(state.copyWith(
@@ -40,13 +45,21 @@ class AddSubscriptionCubit extends Cubit<AddSubscriptionState> {
             status: AddSubscriptionStatus.error,
             errorMessage: failure.message,
           )),
-          (categories) => emit(state.copyWith(
-            status: AddSubscriptionStatus.initial,
-            accounts: accounts,
-            selectedAccount: accounts.isNotEmpty ? accounts.first : null,
-            categories: categories,
-            clearError: true,
-          )),
+          (categories) {
+            final currencies = currenciesResult.fold((_) => state.availableCurrencies, (c) => c);
+            final mainCurrency = currencies.isNotEmpty
+                ? currencies.firstWhere((c) => c.isMain, orElse: () => currencies.first).currency
+                : 'USD';
+            emit(state.copyWith(
+              status: AddSubscriptionStatus.initial,
+              accounts: accounts,
+              selectedAccount: accounts.isNotEmpty ? accounts.first : null,
+              categories: categories,
+              availableCurrencies: currencies,
+              currency: mainCurrency,
+              clearError: true,
+            ));
+          },
         );
       },
     );

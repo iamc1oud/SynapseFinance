@@ -121,6 +121,17 @@ class Transaction(models.Model):
         blank=True,
         related_name='incoming_transfers',
     )
+    currency = models.CharField(
+        max_length=3, choices=CURRENCIES, default=settings.DEFAULT_CURRENCY,
+    )
+    original_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, null=True, blank=True,
+        help_text="Amount in the selected currency (before conversion).",
+    )
+    exchange_rate = models.DecimalField(
+        max_digits=15, decimal_places=7, null=True, blank=True,
+        help_text="Exchange rate used at time of transaction.",
+    )
     note = models.TextField(blank=True)
     date = models.DateField()
     tags = models.ManyToManyField(Tag, blank=True, related_name='transactions')

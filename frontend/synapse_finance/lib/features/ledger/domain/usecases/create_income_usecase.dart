@@ -21,6 +21,7 @@ class CreateIncomeUseCase implements UseCase<void, CreateIncomeParams> {
       date: params.date,
       note: params.note,
       tagIds: params.tagIds,
+      currency: params.currency,
     );
   }
 }
@@ -32,6 +33,7 @@ class CreateIncomeParams extends Equatable {
   final DateTime date;
   final String note;
   final List<int> tagIds;
+  final String? currency;
 
   const CreateIncomeParams({
     required this.amount,
@@ -40,8 +42,9 @@ class CreateIncomeParams extends Equatable {
     required this.date,
     required this.note,
     required this.tagIds,
+    this.currency,
   });
 
   @override
-  List<Object?> get props => [amount, accountId, categoryId, date, note, tagIds];
+  List<Object?> get props => [amount, accountId, categoryId, date, note, tagIds, currency];
 }

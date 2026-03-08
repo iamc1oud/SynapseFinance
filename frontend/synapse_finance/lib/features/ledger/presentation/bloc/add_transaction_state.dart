@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../settings/domain/entities/sub_currency.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/tag.dart';
@@ -21,6 +22,8 @@ class AddTransactionState extends Equatable {
   final List<Tag> tags;
   final List<int> selectedTagIds;
   final String? errorMessage;
+  final List<SubCurrency> availableCurrencies;
+  final String? selectedCurrency;
 
   const AddTransactionState({
     this.status = AddTransactionStatus.initial,
@@ -35,6 +38,8 @@ class AddTransactionState extends Equatable {
     this.tags = const [],
     this.selectedTagIds = const [],
     this.errorMessage,
+    this.availableCurrencies = const [],
+    this.selectedCurrency,
   });
 
   double get amount {
@@ -47,6 +52,8 @@ class AddTransactionState extends Equatable {
     if (amountInput.contains('.')) return amountInput;
     return amountInput;
   }
+
+  String get currencyLabel => selectedCurrency ?? selectedAccount?.currency ?? 'USD';
 
   AddTransactionState copyWith({
     AddTransactionStatus? status,
@@ -64,6 +71,9 @@ class AddTransactionState extends Equatable {
     List<int>? selectedTagIds,
     String? errorMessage,
     bool clearError = false,
+    List<SubCurrency>? availableCurrencies,
+    String? selectedCurrency,
+    bool clearSelectedCurrency = false,
   }) {
     return AddTransactionState(
       status: status ?? this.status,
@@ -78,6 +88,8 @@ class AddTransactionState extends Equatable {
       tags: tags ?? this.tags,
       selectedTagIds: selectedTagIds ?? this.selectedTagIds,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      availableCurrencies: availableCurrencies ?? this.availableCurrencies,
+      selectedCurrency: clearSelectedCurrency ? null : (selectedCurrency ?? this.selectedCurrency),
     );
   }
 
@@ -85,6 +97,6 @@ class AddTransactionState extends Equatable {
   List<Object?> get props => [
     status, transactionType, amountInput, accounts, selectedAccount,
     categories, selectedCategory, selectedDate, note, tags, selectedTagIds,
-    errorMessage,
+    errorMessage, availableCurrencies, selectedCurrency,
   ];
 }
