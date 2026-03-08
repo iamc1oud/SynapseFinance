@@ -6,6 +6,7 @@ import '../../../ledger/domain/entities/account.dart';
 import '../../../ledger/domain/entities/category.dart';
 import '../../../ledger/domain/usecases/get_accounts_usecase.dart';
 import '../../../ledger/domain/usecases/get_categories_usecase.dart';
+import '../../../settings/domain/entities/sub_currency.dart';
 import '../../../settings/domain/usecases/get_user_currencies_usecase.dart';
 import '../../domain/usecases/create_subscription_usecase.dart';
 import 'add_subscription_state.dart';
@@ -46,7 +47,7 @@ class AddSubscriptionCubit extends Cubit<AddSubscriptionState> {
             errorMessage: failure.message,
           )),
           (categories) {
-            final currencies = currenciesResult.fold((_) => state.availableCurrencies, (c) => c);
+            final currencies = currenciesResult.fold((_) => state.availableCurrencies, (c) => List<SubCurrency>.from(c));
             final mainCurrency = currencies.isNotEmpty
                 ? currencies.firstWhere((c) => c.isMain, orElse: () => currencies.first).currency
                 : 'USD';

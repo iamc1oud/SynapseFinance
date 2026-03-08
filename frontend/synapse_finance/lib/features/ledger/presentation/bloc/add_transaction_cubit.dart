@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/usecases/usecase.dart';
+import '../../../settings/domain/entities/sub_currency.dart';
 import '../../../settings/domain/usecases/get_user_currencies_usecase.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/category.dart';
@@ -48,7 +49,7 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
             errorMessage: failure.message,
           )),
           (categories) {
-            final currencies = currenciesResult.fold((_) => state.availableCurrencies, (c) => c);
+            final currencies = currenciesResult.fold((_) => state.availableCurrencies, (c) => List<SubCurrency>.from(c));
             final mainCurrency = currencies.isNotEmpty
                 ? currencies.firstWhere((c) => c.isMain, orElse: () => currencies.first).currency
                 : null;
