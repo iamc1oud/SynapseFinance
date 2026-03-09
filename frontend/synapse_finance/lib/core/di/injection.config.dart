@@ -85,6 +85,8 @@ import '../../features/settings/domain/repositories/currency_repository.dart'
     as _i44;
 import '../../features/settings/domain/usecases/get_user_currencies_usecase.dart'
     as _i165;
+import '../../features/settings/presentation/bloc/currency_management_cubit.dart'
+    as _i797;
 import '../../features/subscriptions/data/datasources/subscription_api_client.dart'
     as _i22;
 import '../../features/subscriptions/data/repositories/subscription_repository_impl.dart'
@@ -284,6 +286,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i702.AuthEventBus>(),
         gh<_i787.AuthRepository>(),
       ),
+    );
+    gh.factory<_i797.CurrencyManagementCubit>(
+      () => _i797.CurrencyManagementCubit(gh<_i44.CurrencyRepository>()),
     );
     gh.lazySingleton<_i165.GetUserCurrenciesUseCase>(
       () => _i165.GetUserCurrenciesUseCase(gh<_i44.CurrencyRepository>()),

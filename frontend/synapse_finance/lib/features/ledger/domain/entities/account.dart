@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../settings/presentation/constants/fiat_currencies.dart';
+
 class Account extends Equatable {
   final int id;
   final String name;
@@ -19,8 +21,10 @@ class Account extends Equatable {
     required this.isActive,
   });
 
-  String get formattedBalance =>
-      '${currency == 'USD' ? '\$' : currency} ${balance.toStringAsFixed(2)}';
+  String get formattedBalance {
+    final symbol = fiatCurrencies[currency]?.$2 ?? currency;
+    return '$symbol ${balance.toStringAsFixed(2)}';
+  }
 
   @override
   List<Object?> get props => [id, name, accountType, balance, currency, icon, isActive];
