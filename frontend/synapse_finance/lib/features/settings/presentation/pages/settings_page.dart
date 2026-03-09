@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/theme_cubit.dart';
 import '../../../auth/domain/entities/user.dart';
@@ -236,6 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     icon: Icons.attach_money_rounded,
                     label: 'Currency',
                     trailing: 'USD (\$)',
+                    onTap: () => context.push('/currency-management'),
                   ),
                   _SettingsRow(
                     iconBg: const Color(0xFF1E6FDB),

@@ -7,6 +7,7 @@ import '../../../ledger/domain/entities/account.dart';
 import '../../../ledger/presentation/bloc/account_settings_cubit.dart';
 import '../../../ledger/presentation/bloc/account_settings_state.dart';
 import '../../../ledger/presentation/bloc/create_account_cubit.dart';
+import '../bloc/currency_management_cubit.dart';
 import 'create_account_page.dart';
 
 IconData _iconForAccount(String icon) {
@@ -284,8 +285,13 @@ class _AccountSettingsView extends StatelessWidget {
     final cubit = context.read<AccountSettingsCubit>();
     final result = await Navigator.of(context).push<Account>(
       MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => getIt<CreateAccountCubit>(),
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => getIt<CreateAccountCubit>()),
+            BlocProvider(
+              create: (_) => getIt<CurrencyManagementCubit>()..loadCurrencies(),
+            ),
+          ],
           child: const CreateAccountPage(),
         ),
       ),

@@ -1,8 +1,6 @@
 from django.conf import settings
 from django.db import models
 
-from synapse.constants import CURRENCIES
-
 
 ACCOUNT_TYPES = (
     ('checking', 'Checking'),
@@ -36,7 +34,7 @@ class Account(models.Model):
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
     balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     currency = models.CharField(
-        max_length=3, choices=CURRENCIES, default=settings.DEFAULT_CURRENCY,
+        max_length=3, default=settings.DEFAULT_CURRENCY,
     )
     icon = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=True)
@@ -122,7 +120,7 @@ class Transaction(models.Model):
         related_name='incoming_transfers',
     )
     currency = models.CharField(
-        max_length=3, choices=CURRENCIES, default=settings.DEFAULT_CURRENCY,
+        max_length=3, default=settings.DEFAULT_CURRENCY,
     )
     original_amount = models.DecimalField(
         max_digits=15, decimal_places=2, null=True, blank=True,

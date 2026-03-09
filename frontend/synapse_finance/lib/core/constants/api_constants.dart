@@ -26,6 +26,10 @@ class ApiConstants {
 
   // Currency endpoints
   static const String userCurrencies = '/currencies/user';
+  static const String currencyRates = '/currencies/rates';
+  static const String addSubCurrency = '/currencies/subcurrency';
+  static const String refreshRates = '/currencies/refresh-rates';
+  static const String changePrimaryCurrency = '/currencies/change-primary';
 
   // Subscription endpoints
   static const String subscriptions = '/subscriptions/';

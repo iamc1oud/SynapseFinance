@@ -15,6 +15,8 @@ import '../../features/ledger/presentation/pages/add_transaction_page.dart';
 import '../../features/ledger/presentation/pages/add_transfer_page.dart';
 import '../../features/ledger/presentation/pages/create_category_page.dart';
 import '../../features/subscriptions/domain/entities/subscription.dart';
+import '../../features/settings/presentation/bloc/currency_management_cubit.dart';
+import '../../features/settings/presentation/pages/currency_management_page.dart';
 import '../../features/subscriptions/presentation/bloc/add_subscription_cubit.dart';
 import '../../features/subscriptions/presentation/pages/add_subscription_page.dart';
 import '../../features/subscriptions/presentation/pages/subscription_success_page.dart';
@@ -81,6 +83,13 @@ class AppRouter {
         builder: (context, state) => BlocProvider(
           create: (_) => CreateCategoryCubit(getIt<CreateCategoryUseCase>()),
           child: const CreateCategoryPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/currency-management',
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<CurrencyManagementCubit>(),
+          child: const CurrencyManagementPage(),
         ),
       ),
       GoRoute(

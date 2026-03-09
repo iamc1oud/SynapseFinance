@@ -114,3 +114,11 @@ class ExchangeRateResponse(Schema):
 class AddSubCurrencyRequest(Schema):
     currency: str
     unit_position: str = "front"
+
+
+class UpdateExchangeRateRequest(Schema):
+    exchange_rate: float
+
+
+class ChangePrimaryCurrencyRequest(Schema):
+    currency: str

@@ -5,6 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../ledger/presentation/bloc/create_account_cubit.dart';
 import '../../../ledger/presentation/bloc/create_account_state.dart';
+import '../bloc/currency_management_cubit.dart';
+import '../bloc/currency_management_state.dart';
+import '../constants/fiat_currencies.dart';
 
 const _accountTypes = [
   ('checking', 'Checking'),
@@ -35,6 +38,7 @@ class CreateAccountPage extends StatefulWidget {
 class _CreateAccountPageState extends State<CreateAccountPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _balanceController;
+  bool _currencyInitialized = false;
 
   @override
   void initState() {
@@ -53,7 +57,17 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   @override
   Widget build(BuildContext context) {
     final c = context.appColors;
-    return BlocConsumer<CreateAccountCubit, CreateAccountState>(
+    return BlocListener<CurrencyManagementCubit, CurrencyManagementState>(
+      listener: (context, currState) {
+        if (!_currencyInitialized &&
+            currState.mainCurrency != null) {
+          _currencyInitialized = true;
+          context
+              .read<CreateAccountCubit>()
+              .setCurrency(currState.mainCurrency!.currency);
+        }
+      },
+      child: BlocConsumer<CreateAccountCubit, CreateAccountState>(
       listener: (context, state) {
         if (state.status == CreateAccountStatus.saved) {
           Navigator.of(context).pop(state.createdAccount);
@@ -150,6 +164,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 const SizedBox(height: 24),
 
+                // Currency
+                _SectionLabel('Currency'),
+                const SizedBox(height: 8),
+                _CurrencySelector(
+                  selected: state.currency,
+                  onChanged: cubit.setCurrency,
+                ),
+                const SizedBox(height: 24),
+
                 // Initial balance
                 _SectionLabel('Initial Balance'),
                 const SizedBox(height: 8),
@@ -169,7 +192,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   decoration: _inputDecoration(
                     c,
                     hintText: '0.00',
-                    prefixText: '\$ ',
+                    prefixText:
+                        '${fiatCurrencies[state.currency]?.$2 ?? '\$'} ',
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -187,6 +211,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           ),
         );
       },
+    ),
     );
   }
 }
@@ -383,6 +408,75 @@ class _IconGrid extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _CurrencySelector extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  const _CurrencySelector({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+
+    // Get user's configured currencies from CurrencyManagementCubit if available
+    final currencyState =
+        context.watch<CurrencyManagementCubit>().state;
+    final userCurrencies = <String>[];
+    if (currencyState.mainCurrency != null) {
+      userCurrencies.add(currencyState.mainCurrency!.currency);
+    }
+    for (final sc in currencyState.subCurrencies) {
+      userCurrencies.add(sc.currency);
+    }
+
+    // Fallback if no currencies loaded yet
+    if (userCurrencies.isEmpty) {
+      userCurrencies.add('USD');
+    }
+
+    // Ensure selected currency is in the list
+    if (!userCurrencies.contains(selected)) {
+      userCurrencies.add(selected);
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: userCurrencies.map((code) {
+        final isSelected = selected == code;
+        final info = fiatCurrencies[code];
+        final symbol = info?.$2 ?? code;
+        return GestureDetector(
+          onTap: () => onChanged(code),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected ? c.primary : c.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: isSelected
+                  ? null
+                  : Border.all(color: c.border, width: 1),
+            ),
+            child: Text(
+              '$code ($symbol)',
+              style: TextStyle(
+                color: isSelected ? c.background : c.textSecondary,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

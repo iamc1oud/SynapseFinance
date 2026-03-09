@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../settings/presentation/constants/fiat_currencies.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/tag.dart';
 import '../bloc/add_transfer_cubit.dart';
@@ -115,7 +116,7 @@ class _AddTransferPageState extends State<AddTransferPage> {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                '\$',
+                fiatCurrencies[state.fromAccount?.currency]?.$2 ?? '\$',
                 style: TextStyle(
                   fontSize: 28,
                   color: c.primary,
