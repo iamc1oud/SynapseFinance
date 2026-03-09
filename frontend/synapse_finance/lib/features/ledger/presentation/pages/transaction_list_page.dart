@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../settings/presentation/constants/fiat_currencies.dart';
 import '../../domain/entities/category_transaction_group.dart';
 import '../../domain/entities/transaction.dart';
 import '../bloc/transaction_list_cubit.dart';
@@ -158,6 +159,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
                         group.categoryId,
                       ),
                       totalSpending: state.totalSpending,
+                      currencySymbol: fiatCurrencies[state.mainCurrencyCode]?.$2 ?? '\$',
                       onToggle: () => cubit.toggleCategory(group.categoryId),
                       onAddTransaction: () => context.push('/add-transaction'),
                     );
@@ -415,7 +417,7 @@ class _TransactionListPageState extends State<TransactionListPage> {
           ),
           const Spacer(),
           Text(
-            '\$${NumberFormat('#,##0.00').format(state.totalSpending)}',
+            '${fiatCurrencies[state.mainCurrencyCode]?.$2 ?? '\$'}${NumberFormat('#,##0.00').format(state.totalSpending)}',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -645,6 +647,7 @@ class _CategoryGroupTile extends StatelessWidget {
   final CategoryTransactionGroup group;
   final bool isExpanded;
   final double totalSpending;
+  final String currencySymbol;
   final VoidCallback onToggle;
   final VoidCallback onAddTransaction;
 
@@ -652,6 +655,7 @@ class _CategoryGroupTile extends StatelessWidget {
     required this.group,
     required this.isExpanded,
     required this.totalSpending,
+    required this.currencySymbol,
     required this.onToggle,
     required this.onAddTransaction,
   });
@@ -729,7 +733,7 @@ class _CategoryGroupTile extends StatelessWidget {
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                '\$${NumberFormat('#,##0.##').format(group.total)}',
+                                '$currencySymbol${NumberFormat('#,##0.##').format(group.total)}',
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: c.textSecondary,
@@ -860,8 +864,9 @@ class _TransactionItem extends StatelessWidget {
     final title = transaction.note.isNotEmpty
         ? transaction.note
         : transaction.category?.name ?? 'Transaction';
+    final symbol = fiatCurrencies[transaction.account.currency]?.$2 ?? '\$';
     final subtitle =
-        '\$${NumberFormat('#,##0.##').format(transaction.amount)} at ${transaction.account.name}';
+        '$symbol${NumberFormat('#,##0.##').format(transaction.amount)} at ${transaction.account.name}';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

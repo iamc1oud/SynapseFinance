@@ -1,17 +1,24 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../settings/domain/repositories/currency_repository.dart';
 import '../../domain/usecases/get_transactions_by_category_usecase.dart';
 import 'transaction_list_state.dart';
 
 @injectable
 class TransactionListCubit extends Cubit<TransactionListState> {
   final GetTransactionsByCategoryUseCase _getTransactionsByCategoryUseCase;
+  final CurrencyRepository _currencyRepository;
 
-  TransactionListCubit(this._getTransactionsByCategoryUseCase)
-      : super(TransactionListState.initial());
+  TransactionListCubit(
+    this._getTransactionsByCategoryUseCase,
+    this._currencyRepository,
+  ) : super(TransactionListState.initial());
 
   Future<void> loadData() async {
+    if (state.mainCurrencyCode == 'USD' && state.status == TransactionListStatus.initial) {
+      _loadMainCurrency();
+    }
     emit(state.copyWith(status: TransactionListStatus.loading, clearError: true));
 
     final result = await _getTransactionsByCategoryUseCase(
@@ -121,5 +128,18 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
   void dismissAiSuggestion() {
     emit(state.copyWith(aiSuggestionDismissed: true));
+  }
+
+  Future<void> _loadMainCurrency() async {
+    final result = await _currencyRepository.getUserCurrencies();
+    result.fold(
+      (_) {},
+      (currencies) {
+        final main = currencies.where((c) => c.isMain).firstOrNull;
+        if (main != null) {
+          emit(state.copyWith(mainCurrencyCode: main.currency));
+        }
+      },
+    );
   }
 }

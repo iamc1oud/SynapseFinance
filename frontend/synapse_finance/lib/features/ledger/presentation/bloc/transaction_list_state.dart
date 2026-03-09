@@ -18,6 +18,7 @@ class TransactionListState extends Equatable {
   final List<int> expandedCategoryIds;
   final String searchQuery;
   final bool aiSuggestionDismissed;
+  final String mainCurrencyCode;
   final String? errorMessage;
 
   const TransactionListState({
@@ -30,6 +31,7 @@ class TransactionListState extends Equatable {
     required this.expandedCategoryIds,
     required this.searchQuery,
     required this.aiSuggestionDismissed,
+    this.mainCurrencyCode = 'USD',
     this.errorMessage,
   });
 
@@ -91,6 +93,7 @@ class TransactionListState extends Equatable {
     List<int>? expandedCategoryIds,
     String? searchQuery,
     bool? aiSuggestionDismissed,
+    String? mainCurrencyCode,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -104,6 +107,7 @@ class TransactionListState extends Equatable {
       expandedCategoryIds: expandedCategoryIds ?? this.expandedCategoryIds,
       searchQuery: searchQuery ?? this.searchQuery,
       aiSuggestionDismissed: aiSuggestionDismissed ?? this.aiSuggestionDismissed,
+      mainCurrencyCode: mainCurrencyCode ?? this.mainCurrencyCode,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -112,6 +116,6 @@ class TransactionListState extends Equatable {
   List<Object?> get props => [
     status, viewMode, transactionTypeFilter, selectedDate, currentWeekStart,
     categoryGroups, expandedCategoryIds, searchQuery, aiSuggestionDismissed,
-    errorMessage,
+    mainCurrencyCode, errorMessage,
   ];
 }

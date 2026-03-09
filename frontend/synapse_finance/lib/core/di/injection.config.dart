@@ -296,6 +296,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i660.TransactionListCubit>(
       () => _i660.TransactionListCubit(
         gh<_i417.GetTransactionsByCategoryUseCase>(),
+        gh<_i44.CurrencyRepository>(),
       ),
     );
     gh.factory<_i99.AddTransactionCubit>(

@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../ledger/domain/usecases/get_transactions_by_category_usecase.dart';
 import '../../../ledger/presentation/bloc/transaction_list_cubit.dart';
 import '../../../ledger/presentation/pages/transaction_list_page.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
@@ -28,9 +27,7 @@ class _HomePageState extends State<HomePage> {
   late final _tabs = [
     const _AssistantTab(),
     BlocProvider(
-      create: (_) => TransactionListCubit(
-        getIt<GetTransactionsByCategoryUseCase>(),
-      ),
+      create: (_) => getIt<TransactionListCubit>(),
       child: const TransactionListPage(),
     ),
     BlocProvider.value(
