@@ -47,6 +47,10 @@ dependencies:
   go_router: ^17.0.1
   logger: ^2.6.2
   intl: ^0.20.2
+  drift: ^2.32.0
+  sqlite3_flutter_libs: ^0.6.0+eol # SQLite ORM for chat history & memory
+  flutter_markdown: ^0.7.7+1 # Render markdown in AI response
+  uuid: ^4.5.3 # Generate unique IDs for messages
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +67,7 @@ dev_dependencies:
   mocktail: ^1.0.4
   injectable_generator: ^2.6.2
   json_serializable: ^6.12.0
+  drift_dev: ^2.32.0 # Drift code generation
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

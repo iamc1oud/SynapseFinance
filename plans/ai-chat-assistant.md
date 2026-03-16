@@ -64,7 +64,7 @@ The **Assistant tab** (tab 0 in the home page) is already reserved but shows onl
 
 ### Key Design Decisions
 
-1. **LLM runs client-side (API call from Flutter)** — The Flutter app calls the Claude API directly with tool definitions. The LLM decides which tools to call, and the app executes them against our Django backend. No MCP server needed — we define MCP-style tool schemas in the app and map them to our existing REST API.
+1. **LLM runs via self-hosted Ollama** — The Flutter app calls a self-hosted Ollama instance (OpenAI-compatible API at `http://<host>:11434/v1`). The LLM decides which tools to call, and the app executes them against our Django backend. No MCP server needed — we define tool schemas in the app and map them to our existing REST API.
 
 2. **Tool execution is local** — When the LLM returns a tool call (e.g., `create_expense`), the Flutter app executes it using the existing Retrofit API clients. This reuses all existing auth, error handling, and data layer code.
 
@@ -523,21 +523,36 @@ lib/features/assistant/
 ```yaml
 # pubspec.yaml additions
 dependencies:
-  anthropic_sdk_dart: ^x.x.x   # Claude API client (or use dio directly)
   drift: ^2.x.x                # SQLite for chat history & memory
+  sqlite3_flutter_libs: ^0.5.x # SQLite native bindings
   flutter_markdown: ^0.x.x     # Render markdown in AI responses
   uuid: ^4.x.x                 # Generate message IDs
+  # No LLM SDK needed — we use Dio directly against Ollama's OpenAI-compatible API
 ```
 
-### 6.3 AI Service Layer
+### 6.3 AI Service Layer (Ollama — OpenAI-compatible API)
+
+The AI Service uses Dio to call Ollama's OpenAI-compatible endpoint. Ollama supports tool/function calling via the same format as OpenAI.
 
 ```dart
-// ai_service.dart — Core LLM integration
+// ai_service.dart — Core LLM integration via Ollama
 
 class AiService {
   final Dio _dio;
   final ToolRegistry _toolRegistry;
   final MemoryManager _memoryManager;
+
+  // Ollama base URL — configurable in settings
+  String _baseUrl = 'http://localhost:11434/v1';
+  String _model = 'qwen2.5:14b';  // or llama3.1, mistral, etc.
+
+  AiService(this._toolRegistry, this._memoryManager)
+    : _dio = Dio();
+
+  void configure({required String baseUrl, String? model}) {
+    _baseUrl = baseUrl;
+    if (model != null) _model = model;
+  }
 
   /// Send a message and get a streamed response
   Stream<AiResponseChunk> sendMessage({
@@ -546,36 +561,51 @@ class AiService {
     List<ChatCommand>? activeCommands,
   }) async* {
     final systemPrompt = await _buildSystemPrompt();
-    final tools = _toolRegistry.getToolSchemas();
-    final messages = _buildMessageHistory(history);
+    final tools = _toolRegistry.getOpenAIToolSchemas();
+    final messages = [
+      {'role': 'system', 'content': systemPrompt},
+      ..._buildMessageHistory(history),
+      {'role': 'user', 'content': userMessage},
+    ];
 
-    // Stream response from Claude API
-    final stream = _callClaudeAPI(
-      system: systemPrompt,
-      messages: [...messages, {'role': 'user', 'content': userMessage}],
-      tools: tools,
+    final body = {
+      'model': _model,
+      'messages': messages,
+      'tools': tools,
+      'stream': true,
+    };
+
+    final response = await _dio.post(
+      '$_baseUrl/chat/completions',
+      data: body,
+      options: Options(responseType: ResponseType.stream),
     );
 
-    await for (final chunk in stream) {
-      if (chunk.type == 'thinking') {
-        yield AiThinkingChunk(text: chunk.text);
-      } else if (chunk.type == 'text') {
-        yield AiTextChunk(text: chunk.text);
-      } else if (chunk.type == 'tool_use') {
-        yield AiToolCallChunk(
-          toolName: chunk.toolName,
-          arguments: chunk.arguments,
-        );
-      }
+    // Parse SSE stream (OpenAI format)
+    await for (final chunk in _parseSSEStream(response)) {
+      yield chunk;
     }
   }
-
-  Future<String> _buildSystemPrompt() async {
-    final memories = await _memoryManager.getRelevantMemories();
-    final accountsSummary = await _getAccountsSummary();
-    return _systemPromptTemplate(memories, accountsSummary);
-  }
 }
+```
+
+**Key difference from Claude API:** Ollama uses OpenAI-compatible format:
+- Tools use `{"type": "function", "function": {"name": ..., "parameters": ...}}` format
+- Streaming uses SSE with `data: {"choices": [{"delta": {...}}]}` format
+- Tool results are sent as `{"role": "tool", "tool_call_id": ..., "content": ...}`
+- System prompt is a message with `role: "system"` (not a separate field)
+
+```dart
+// In ToolRegistry, add OpenAI format conversion:
+List<Map<String, dynamic>> getOpenAIToolSchemas() =>
+    _tools.values.map((t) => {
+      'type': 'function',
+      'function': {
+        'name': t.name,
+        'description': t.description,
+        'parameters': t.inputSchema,
+      },
+    }).toList();
 ```
 
 ### 6.4 Tool Registry & Executor
@@ -725,33 +755,78 @@ late final _tabs = [
 
 ---
 
-## 7. LLM Integration Details
+## 7. Ollama Integration Details
 
-### 7.1 API Key Management
+### 7.1 Ollama Setup & Configuration
 
-- API key stored in `flutter_secure_storage` (same as auth tokens)
-- Key is set during onboarding or in Settings
-- Option 1: User provides their own Claude API key
-- Option 2: Proxy through our backend (add `/api/assistant/chat` endpoint that forwards to Claude — better for key management but adds latency)
+- Ollama runs on a self-hosted machine (local or remote server)
+- Default API: `http://localhost:11434` (Ollama native) or `http://localhost:11434/v1` (OpenAI-compatible)
+- No API key required for local Ollama (unless configured with `OLLAMA_API_KEY`)
+- Store Ollama base URL in `flutter_secure_storage` or app preferences
+- For remote access, expose Ollama via `OLLAMA_HOST=0.0.0.0` and use the server's IP/domain
 
 ### 7.2 Model Selection
 
-- Default: `claude-sonnet-4-6` — good balance of speed and quality for chat
-- Optional: `claude-haiku-4-5` for faster responses on simple queries
-- Model can be configured in settings
+Recommended models with tool/function calling support:
+- **`qwen2.5:14b`** — Best tool calling support, good reasoning (recommended)
+- **`llama3.1:8b`** — Lightweight, decent tool calling
+- **`mistral:7b`** — Fast responses, function calling support
+- **`qwen2.5:7b`** — Smaller Qwen, still good tool calling
+- Model is configurable in Settings page
+- Pull models via `ollama pull <model>` on the host machine
 
-### 7.3 Rate Limiting
+### 7.3 OpenAI-Compatible API Format
 
-- Track daily query count locally
-- Display "X/Y daily queries" in the chat footer
-- If proxying through backend, enforce rate limits server-side
+Ollama's `/v1/chat/completions` endpoint follows OpenAI format:
+
+```json
+{
+  "model": "qwen2.5:14b",
+  "messages": [
+    {"role": "system", "content": "..."},
+    {"role": "user", "content": "..."}
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "list_accounts",
+        "description": "...",
+        "parameters": { "type": "object", "properties": {} }
+      }
+    }
+  ],
+  "stream": true
+}
+```
+
+Tool call responses come as:
+```json
+{
+  "choices": [{
+    "message": {
+      "tool_calls": [{
+        "id": "call_123",
+        "type": "function",
+        "function": { "name": "list_accounts", "arguments": "{}" }
+      }]
+    }
+  }]
+}
+```
+
+Send tool results back as:
+```json
+{"role": "tool", "tool_call_id": "call_123", "content": "{...json result...}"}
+```
 
 ### 7.4 Token Management
 
+- Context window depends on model (Qwen2.5 = 128K, Llama3.1 = 128K)
+- Self-hosted = no rate limits, but VRAM is the bottleneck
 - Keep conversation history within context window limits
 - Summarize older messages when approaching the limit
 - System prompt + tools + memory ≈ 2-3K tokens baseline
-- Reserve ~4K tokens for response
 
 ---
 
@@ -781,10 +856,10 @@ late final _tabs = [
 - Include exchange rate info in tool responses
 
 ### 8.6 Security
-- API key never logged or sent to our backend (unless using proxy mode)
-- Conversation data stored locally only
-- No PII sent beyond what the user types and their financial data (which the LLM needs to answer)
+- Self-hosted Ollama means all LLM inference stays on your own infrastructure — no data leaves your network
+- Conversation data stored locally on device only
 - Tool calls are scoped to the authenticated user's data (backend RLS enforces this)
+- If Ollama is exposed remotely, use HTTPS reverse proxy (nginx/caddy) and consider `OLLAMA_API_KEY`
 
 ---
 
@@ -884,6 +959,6 @@ late final _tabs = [
 - **Image receipt scanning** — Use vision model to extract transaction data from receipts
 - **Proactive insights** — AI sends push notifications: "You've spent 80% of your food budget with 10 days left"
 - **Multi-modal responses** — Charts and graphs rendered inline in chat
-- **Backend proxy mode** — Route LLM calls through Django for API key management and analytics
+- **Backend proxy mode** — Route LLM calls through Django for centralized model management and analytics
 - **Shared financial assistant** — Multi-user households sharing one assistant context
 - **Plugin system** — Third-party tool definitions (bank integrations, investment tracking)
