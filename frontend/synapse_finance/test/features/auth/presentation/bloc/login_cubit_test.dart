@@ -9,6 +9,7 @@ import 'package:synapse_finance/features/auth/domain/usecases/get_current_user_u
 import 'package:synapse_finance/features/auth/domain/usecases/login_usecase.dart';
 import 'package:synapse_finance/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:synapse_finance/core/network/auth_event_bus.dart';
+import 'package:synapse_finance/features/auth/domain/repositories/auth_repository.dart';
 import 'package:synapse_finance/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:synapse_finance/features/auth/presentation/bloc/login_cubit.dart';
 import 'package:synapse_finance/features/auth/presentation/bloc/login_state.dart';
@@ -22,6 +23,8 @@ class MockGetCurrentUserUseCase extends Mock implements GetCurrentUserUseCase {}
 class MockCheckAuthStatusUseCase extends Mock
     implements CheckAuthStatusUseCase {}
 
+class MockAuthRepository extends Mock implements AuthRepository {}
+
 class FakeLoginParams extends Fake implements LoginParams {}
 
 class FakeNoParams extends Fake implements NoParams {}
@@ -33,6 +36,7 @@ void main() {
   late MockLogoutUseCase mockLogoutUseCase;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
   late MockCheckAuthStatusUseCase mockCheckAuthStatusUseCase;
+  late MockAuthRepository mockAuthRepository;
 
   setUpAll(() {
     registerFallbackValue(FakeLoginParams());
@@ -44,12 +48,14 @@ void main() {
     mockLogoutUseCase = MockLogoutUseCase();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
     mockCheckAuthStatusUseCase = MockCheckAuthStatusUseCase();
+    mockAuthRepository = MockAuthRepository();
     authCubit = AuthCubit(
       mockLoginUseCase,
       mockLogoutUseCase,
       mockGetCurrentUserUseCase,
       mockCheckAuthStatusUseCase,
       AuthEventBus(),
+      mockAuthRepository,
     );
     loginCubit = LoginCubit(mockLoginUseCase, authCubit);
   });
