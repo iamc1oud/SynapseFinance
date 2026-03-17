@@ -23,6 +23,12 @@ class ChatCubit extends Cubit<ChatState> {
   /// Conversation history in OpenAI format for Ollama.
   final List<Map<String, dynamic>> _messageHistory = [];
 
+  /// Cached context for system prompt (fetched once on first message).
+  String _accountsContext = '';
+  String _categoriesContext = '';
+  String _currencyContext = '';
+  bool _contextLoaded = false;
+
   ChatCubit(this._aiService, this._toolRegistry, this._toolExecutor)
       : super(const ChatState());
 
@@ -39,6 +45,7 @@ class ChatCubit extends Cubit<ChatState> {
     emit(state.copyWith(isThinking: true, currentAiText: ''));
 
     try {
+      await _loadContextIfNeeded();
       await _runAgenticLoop(0);
     } on DioException catch (e) {
       _addMessage(AiTextMessage(
@@ -231,21 +238,72 @@ class ChatCubit extends Cubit<ChatState> {
     return 'Ollama error: ${e.message}';
   }
 
+  Future<void> _loadContextIfNeeded() async {
+    if (_contextLoaded) return;
+    try {
+      final accountsResult = await _toolExecutor.execute('list_accounts', {});
+      final accounts = accountsResult['accounts'] as List;
+      _accountsContext = accounts
+          .map((a) =>
+              '- ${a['name']} (ID: ${a['id']}, type: ${a['account_type']}, balance: ${a['balance']} ${a['currency']})')
+          .join('\n');
+
+      final categoriesResult =
+          await _toolExecutor.execute('list_categories', {});
+      final categories = categoriesResult['categories'] as List;
+      _categoriesContext = categories
+          .map((c) =>
+              '- ${c['name']} (ID: ${c['id']}, type: ${c['category_type']})')
+          .join('\n');
+
+      final currencyResult =
+          await _toolExecutor.execute('get_currency_info', {});
+      final currencies = currencyResult['currencies'] as List;
+      final primary = currencies.firstWhere(
+        (c) => c['is_main'] == true,
+        orElse: () => currencies.first,
+      );
+      _currencyContext =
+          'Primary currency: ${primary['currency']}\n'
+          'All currencies: ${currencies.map((c) => '${c['currency']}${c['is_main'] == true ? ' (primary)' : ' (rate: ${c['exchange_rate']})'}').join(', ')}';
+    } catch (_) {
+      // Non-fatal — the LLM can still use tools to fetch this info
+    }
+    _contextLoaded = true;
+  }
+
   String _buildSystemPrompt() {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    return '''You are an AI finance assistant for Synapse Finance.
+    final buffer = StringBuffer('''You are an AI finance assistant for Synapse Finance.
 You help users manage their money through natural language.
 
 CURRENT DATE: $today
+''');
 
+    if (_currencyContext.isNotEmpty) {
+      buffer.writeln('\n$_currencyContext');
+    }
+
+    if (_accountsContext.isNotEmpty) {
+      buffer.writeln('\nUSER ACCOUNTS:\n$_accountsContext');
+    }
+
+    if (_categoriesContext.isNotEmpty) {
+      buffer.writeln('\nCATEGORIES:\n$_categoriesContext');
+    }
+
+    buffer.write('''
 RULES:
 1. For ANY action that creates, modifies, or deletes data, use the appropriate tool. Never describe the action in text only.
-2. Before calling a mutation tool, ensure ALL required fields are known. If any are missing, ASK the user.
+2. Before calling a mutation tool, ensure ALL required fields are known. If any are missing, ASK the user — refer to accounts and categories by NAME, not ID.
 3. For read-only queries, call the tool and summarize results in a friendly, concise way.
-4. When showing amounts, format them with the currency symbol.
+4. When showing amounts, format them with the currency symbol. If the user doesn't specify a currency, assume the primary currency.
 5. If the user asks about something outside personal finance, politely redirect.
 6. Keep responses concise and helpful.
-7. When multiple accounts exist, clarify which one to use.''';
+7. When multiple accounts exist, clarify which one to use by showing account names.
+8. Use the account/category IDs from the context above when calling tools — do NOT ask the user for IDs.''');
+
+    return buffer.toString();
   }
 }
 
