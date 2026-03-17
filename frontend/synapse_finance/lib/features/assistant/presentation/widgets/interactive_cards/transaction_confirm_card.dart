@@ -82,7 +82,7 @@ class TransactionConfirmCard extends StatelessWidget {
             if (data['account_id'] != null)
               _DetailRow(
                 label: 'Account',
-                value: 'Account #${data['account_id']}',
+                value: (data['account_name'] as String?) ?? 'Account #${data['account_id']}',
                 colors: c,
               ),
 
@@ -90,13 +90,13 @@ class TransactionConfirmCard extends StatelessWidget {
             if (data['from_account_id'] != null)
               _DetailRow(
                 label: 'From',
-                value: 'Account #${data['from_account_id']}',
+                value: (data['from_account_name'] as String?) ?? 'Account #${data['from_account_id']}',
                 colors: c,
               ),
             if (data['to_account_id'] != null)
               _DetailRow(
                 label: 'To',
-                value: 'Account #${data['to_account_id']}',
+                value: (data['to_account_name'] as String?) ?? 'Account #${data['to_account_id']}',
                 colors: c,
               ),
 
@@ -104,7 +104,7 @@ class TransactionConfirmCard extends StatelessWidget {
             if (data['category_id'] != null)
               _DetailRow(
                 label: 'Category',
-                value: 'Category #${data['category_id']}',
+                value: (data['category_name'] as String?) ?? 'Category #${data['category_id']}',
                 colors: c,
               ),
 

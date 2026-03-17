@@ -7,6 +7,7 @@ import '../bloc/chat_state.dart';
 import '../widgets/chat_input_bar.dart';
 import '../widgets/command_overlay.dart';
 import '../widgets/message_bubble.dart';
+import '../widgets/ai_icon_animation.dart';
 import '../widgets/thinking_indicator.dart';
 
 class ChatPage extends StatefulWidget {
@@ -136,7 +137,7 @@ class _ChatPageState extends State<ChatPage> {
       children: [
         _buildAppBar(context),
         const Spacer(),
-        Icon(Icons.auto_awesome, size: 64, color: c.primary),
+        const AiIconAnimation(size: 120),
         const SizedBox(height: 16),
         Text(
           'How can I help with your finances?',

@@ -29,6 +29,10 @@ class ChatCubit extends Cubit<ChatState> {
   String _currencyContext = '';
   bool _contextLoaded = false;
 
+  /// Lookup maps for resolving IDs to names in interactive cards.
+  final Map<int, String> _accountNames = {};
+  final Map<int, String> _categoryNames = {};
+
   ChatCubit(this._aiService, this._toolRegistry, this._toolExecutor)
     : super(const ChatState()) {
     // NOTE: We can call aiService.configure to use any LLM Provider.
@@ -190,6 +194,25 @@ class ChatCubit extends Cubit<ChatState> {
               }),
             });
 
+            // Enrich with display names for the card UI
+            final enriched = Map<String, dynamic>.from(arguments);
+            if (enriched.containsKey('account_id')) {
+              enriched['account_name'] =
+                  _accountNames[enriched['account_id']] ?? 'Account #${enriched['account_id']}';
+            }
+            if (enriched.containsKey('from_account_id')) {
+              enriched['from_account_name'] =
+                  _accountNames[enriched['from_account_id']] ?? 'Account #${enriched['from_account_id']}';
+            }
+            if (enriched.containsKey('to_account_id')) {
+              enriched['to_account_name'] =
+                  _accountNames[enriched['to_account_id']] ?? 'Account #${enriched['to_account_id']}';
+            }
+            if (enriched.containsKey('category_id')) {
+              enriched['category_name'] =
+                  _categoryNames[enriched['category_id']] ?? 'Category #${enriched['category_id']}';
+            }
+
             // Show interactive card — don't execute yet
             final cardType = _getCardType(toolName);
             _addMessage(
@@ -198,7 +221,7 @@ class ChatCubit extends Cubit<ChatState> {
                 timestamp: DateTime.now(),
                 cardType: cardType,
                 toolName: toolName,
-                data: arguments,
+                data: enriched,
               ),
             );
           } else {
@@ -311,6 +334,10 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       final accountsResult = await _toolExecutor.execute('list_accounts', {});
       final accounts = accountsResult['accounts'] as List;
+      _accountNames.clear();
+      for (final a in accounts) {
+        _accountNames[a['id'] as int] = a['name'] as String;
+      }
       _accountsContext = accounts
           .map(
             (a) =>
@@ -323,6 +350,10 @@ class ChatCubit extends Cubit<ChatState> {
         {},
       );
       final categories = categoriesResult['categories'] as List;
+      _categoryNames.clear();
+      for (final c in categories) {
+        _categoryNames[c['id'] as int] = c['name'] as String;
+      }
       _categoriesContext = categories
           .map(
             (c) =>
