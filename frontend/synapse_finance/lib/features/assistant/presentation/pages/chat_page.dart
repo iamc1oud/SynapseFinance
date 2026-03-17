@@ -68,8 +68,11 @@ class _ChatPageState extends State<ChatPage> {
                   ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
-                    itemCount: state.messages.length +
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    itemCount:
+                        state.messages.length +
                         (state.isThinking ? 1 : 0) +
                         (state.currentAiText.isNotEmpty ? 1 : 0),
                     itemBuilder: (context, index) {
@@ -83,7 +86,8 @@ class _ChatPageState extends State<ChatPage> {
                           state.messages.length +
                               (state.currentAiText.isNotEmpty ? 1 : 0)) {
                         return ThinkingIndicator(
-                            text: state.currentThinkingText);
+                          text: state.currentThinkingText,
+                        );
                       }
                       return MessageBubble(
                         message: state.messages[index],
@@ -103,9 +107,9 @@ class _ChatPageState extends State<ChatPage> {
                         onCommandSelected: (cmd) {
                           _textController.clear();
                           setState(() => _showCommands = false);
-                          context
-                              .read<ChatCubit>()
-                              .sendMessage(cmd.systemPrompt);
+                          context.read<ChatCubit>().sendMessage(
+                            cmd.systemPrompt,
+                          );
                         },
                       ),
                     ),
@@ -184,7 +188,7 @@ class _ChatPageState extends State<ChatPage> {
             Icon(Icons.auto_awesome, color: c.primary, size: 24),
             const SizedBox(width: 10),
             Text(
-              'AI Assistant',
+              'Synapse Manager',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -212,14 +216,18 @@ class _ChatPageState extends State<ChatPage> {
         runSpacing: 8,
         alignment: WrapAlignment.center,
         children: actions
-            .map((a) => ActionChip(
-                  avatar: Icon(a.$2, size: 16, color: c.primary),
-                  label: Text(a.$1,
-                      style: TextStyle(color: c.textPrimary, fontSize: 13)),
-                  backgroundColor: c.surfaceLight,
-                  side: BorderSide(color: c.border),
-                  onPressed: () => _onSend(a.$1),
-                ))
+            .map(
+              (a) => ActionChip(
+                avatar: Icon(a.$2, size: 16, color: c.primary),
+                label: Text(
+                  a.$1,
+                  style: TextStyle(color: c.textPrimary, fontSize: 13),
+                ),
+                backgroundColor: c.surfaceLight,
+                side: BorderSide(color: c.border),
+                onPressed: () => _onSend(a.$1),
+              ),
+            )
             .toList(),
       ),
     );
@@ -240,10 +248,7 @@ class _StreamingBubble extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 8, right: 48),
         padding: const EdgeInsets.all(12),
-        child: Text(
-          text,
-          style: TextStyle(color: c.textPrimary, fontSize: 15),
-        ),
+        child: Text(text, style: TextStyle(color: c.textPrimary, fontSize: 15)),
       ),
     );
   }
