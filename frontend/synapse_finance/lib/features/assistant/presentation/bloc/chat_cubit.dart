@@ -30,7 +30,7 @@ class ChatCubit extends Cubit<ChatState> {
   bool _contextLoaded = false;
 
   ChatCubit(this._aiService, this._toolRegistry, this._toolExecutor)
-      : super(const ChatState());
+    : super(const ChatState());
 
   // ─── Public API ────────────────────────────────────────────────────────────
 
@@ -48,19 +48,23 @@ class ChatCubit extends Cubit<ChatState> {
       await _loadContextIfNeeded();
       await _runAgenticLoop(0);
     } on DioException catch (e) {
-      _addMessage(AiTextMessage(
-        id: _uuid.v4(),
-        timestamp: DateTime.now(),
-        text: _handleDioError(e),
-        suggestions: null,
-      ));
+      _addMessage(
+        AiTextMessage(
+          id: _uuid.v4(),
+          timestamp: DateTime.now(),
+          text: _handleDioError(e),
+          suggestions: null,
+        ),
+      );
     } catch (e) {
-      _addMessage(AiTextMessage(
-        id: _uuid.v4(),
-        timestamp: DateTime.now(),
-        text: 'Something went wrong: ${e.toString()}',
-        suggestions: null,
-      ));
+      _addMessage(
+        AiTextMessage(
+          id: _uuid.v4(),
+          timestamp: DateTime.now(),
+          text: 'Something went wrong: ${e.toString()}',
+          suggestions: null,
+        ),
+      );
     } finally {
       emit(state.copyWith(isThinking: false));
     }
@@ -77,12 +81,14 @@ class ChatCubit extends Cubit<ChatState> {
       final updated = card.copyWith(status: CardStatus.confirmed);
       final msgs = List<ChatMessage>.from(state.messages);
       msgs[idx] = updated;
-      msgs.add(AiTextMessage(
-        id: _uuid.v4(),
-        timestamp: DateTime.now(),
-        text: 'Done! Transaction recorded successfully.',
-        suggestions: null,
-      ));
+      msgs.add(
+        AiTextMessage(
+          id: _uuid.v4(),
+          timestamp: DateTime.now(),
+          text: 'Done! Transaction recorded successfully.',
+          suggestions: null,
+        ),
+      );
       emit(state.copyWith(messages: msgs));
     } catch (e) {
       emit(state.copyWith(error: 'Failed: ${e.toString()}'));
@@ -105,12 +111,14 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> _runAgenticLoop(int iteration) async {
     if (iteration >= _maxIterations) {
-      _addMessage(AiTextMessage(
-        id: _uuid.v4(),
-        timestamp: DateTime.now(),
-        text: 'Reached processing limit. Please try rephrasing.',
-        suggestions: null,
-      ));
+      _addMessage(
+        AiTextMessage(
+          id: _uuid.v4(),
+          timestamp: DateTime.now(),
+          text: 'Reached processing limit. Please try rephrasing.',
+          suggestions: null,
+        ),
+      );
       return;
     }
 
@@ -128,26 +136,30 @@ class ChatCubit extends Cubit<ChatState> {
           emit(state.copyWith(currentAiText: textBuffer));
 
         case AiToolCallChunk(
-            :final toolCallId,
-            :final toolName,
-            :final arguments
-          ):
+          :final toolCallId,
+          :final toolName,
+          :final arguments,
+        ):
           if (_toolRegistry.isMutation(toolName)) {
             // Show interactive card — don't execute
             final cardType = _getCardType(toolName);
-            _addMessage(InteractiveCardMessage(
-              id: _uuid.v4(),
-              timestamp: DateTime.now(),
-              cardType: cardType,
-              toolName: toolName,
-              data: arguments,
-            ));
+            _addMessage(
+              InteractiveCardMessage(
+                id: _uuid.v4(),
+                timestamp: DateTime.now(),
+                cardType: cardType,
+                toolName: toolName,
+                data: arguments,
+              ),
+            );
           } else {
-            pendingToolCalls.add(_PendingToolCall(
-              id: toolCallId,
-              name: toolName,
-              arguments: arguments,
-            ));
+            pendingToolCalls.add(
+              _PendingToolCall(
+                id: toolCallId,
+                name: toolName,
+                arguments: arguments,
+              ),
+            );
           }
 
         case AiDoneChunk():
@@ -157,12 +169,14 @@ class ChatCubit extends Cubit<ChatState> {
 
     // Finalize streamed text
     if (textBuffer.isNotEmpty) {
-      _addMessage(AiTextMessage(
-        id: _uuid.v4(),
-        timestamp: DateTime.now(),
-        text: textBuffer,
-        suggestions: null,
-      ));
+      _addMessage(
+        AiTextMessage(
+          id: _uuid.v4(),
+          timestamp: DateTime.now(),
+          text: textBuffer,
+          suggestions: null,
+        ),
+      );
       _messageHistory.add({'role': 'assistant', 'content': textBuffer});
       emit(state.copyWith(currentAiText: ''));
     }
@@ -172,24 +186,28 @@ class ChatCubit extends Cubit<ChatState> {
       _messageHistory.add({
         'role': 'assistant',
         'tool_calls': pendingToolCalls
-            .map((tc) => {
-                  'id': tc.id,
-                  'type': 'function',
-                  'function': {
-                    'name': tc.name,
-                    'arguments': jsonEncode(tc.arguments),
-                  },
-                })
+            .map(
+              (tc) => {
+                'id': tc.id,
+                'type': 'function',
+                'function': {
+                  'name': tc.name,
+                  'arguments': jsonEncode(tc.arguments),
+                },
+              },
+            )
             .toList(),
       });
 
       for (final tc in pendingToolCalls) {
-        _addMessage(AiToolCallMessage(
-          id: _uuid.v4(),
-          timestamp: DateTime.now(),
-          toolName: tc.name,
-          arguments: tc.arguments,
-        ));
+        _addMessage(
+          AiToolCallMessage(
+            id: _uuid.v4(),
+            timestamp: DateTime.now(),
+            toolName: tc.name,
+            arguments: tc.arguments,
+          ),
+        );
 
         try {
           final result = await _toolExecutor.execute(tc.name, tc.arguments);
@@ -219,12 +237,12 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   InteractiveCardType _getCardType(String toolName) => switch (toolName) {
-        'create_expense' || 'create_income' =>
-          InteractiveCardType.transactionConfirm,
-        'create_transfer' => InteractiveCardType.transferConfirm,
-        'delete_transaction' => InteractiveCardType.deleteConfirm,
-        _ => InteractiveCardType.transactionConfirm,
-      };
+    'create_expense' ||
+    'create_income' => InteractiveCardType.transactionConfirm,
+    'create_transfer' => InteractiveCardType.transferConfirm,
+    'delete_transaction' => InteractiveCardType.deleteConfirm,
+    _ => InteractiveCardType.transactionConfirm,
+  };
 
   String _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionError ||
@@ -244,27 +262,37 @@ class ChatCubit extends Cubit<ChatState> {
       final accountsResult = await _toolExecutor.execute('list_accounts', {});
       final accounts = accountsResult['accounts'] as List;
       _accountsContext = accounts
-          .map((a) =>
-              '- ${a['name']} (ID: ${a['id']}, type: ${a['account_type']}, balance: ${a['balance']} ${a['currency']})')
+          .map(
+            (a) =>
+                '- ${a['name']} (ID: ${a['id']}, type: ${a['account_type']}, balance: ${a['balance']} ${a['currency']})',
+          )
           .join('\n');
 
-      final categoriesResult =
-          await _toolExecutor.execute('list_categories', {});
+      final categoriesResult = await _toolExecutor.execute(
+        'list_categories',
+        {},
+      );
       final categories = categoriesResult['categories'] as List;
       _categoriesContext = categories
-          .map((c) =>
-              '- ${c['name']} (ID: ${c['id']}, type: ${c['category_type']})')
+          .map(
+            (c) =>
+                '- ${c['name']} (ID: ${c['id']}, type: ${c['category_type']})',
+          )
           .join('\n');
 
-      final currencyResult =
-          await _toolExecutor.execute('get_currency_info', {});
+      final currencyResult = await _toolExecutor.execute(
+        'get_currency_info',
+        {},
+      );
       final currencies = currencyResult['currencies'] as List;
       final primary = currencies.firstWhere(
         (c) => c['is_main'] == true,
         orElse: () => currencies.first,
       );
+      final symbol = _currencySymbol(primary['currency'] as String);
       _currencyContext =
-          'Primary currency: ${primary['currency']}\n'
+          'Primary currency: ${primary['currency']} (symbol: $symbol)\n'
+          'IMPORTANT: Always use "$symbol" when displaying amounts — NEVER use \$ unless the primary currency is USD.\n'
           'All currencies: ${currencies.map((c) => '${c['currency']}${c['is_main'] == true ? ' (primary)' : ' (rate: ${c['exchange_rate']})'}').join(', ')}';
     } catch (_) {
       // Non-fatal — the LLM can still use tools to fetch this info
@@ -274,11 +302,13 @@ class ChatCubit extends Cubit<ChatState> {
 
   String _buildSystemPrompt() {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final buffer = StringBuffer('''You are an AI finance assistant for Synapse Finance.
+    final buffer = StringBuffer(
+      '''You are an AI finance assistant for Synapse Finance.
 You help users manage their money through natural language.
 
 CURRENT DATE: $today
-''');
+''',
+    );
 
     if (_currencyContext.isNotEmpty) {
       buffer.writeln('\n$_currencyContext');
@@ -292,19 +322,49 @@ CURRENT DATE: $today
       buffer.writeln('\nCATEGORIES:\n$_categoriesContext');
     }
 
-    buffer.write('''
+    buffer.write(
+      '''
 RULES:
 1. For ANY action that creates, modifies, or deletes data, use the appropriate tool. Never describe the action in text only.
 2. Before calling a mutation tool, ensure ALL required fields are known. If any are missing, ASK the user — refer to accounts and categories by NAME, not ID.
 3. For read-only queries, call the tool and summarize results in a friendly, concise way.
-4. When showing amounts, format them with the currency symbol. If the user doesn't specify a currency, assume the primary currency.
+4. ALWAYS format amounts using the user's primary currency symbol (from context above). NEVER use \$ unless the user's primary currency is USD. For example, if the primary currency is INR, write ₹500 not \$500.
 5. If the user asks about something outside personal finance, politely redirect.
 6. Keep responses concise and helpful.
 7. When multiple accounts exist, clarify which one to use by showing account names.
-8. Use the account/category IDs from the context above when calling tools — do NOT ask the user for IDs.''');
+8. Use the account/category IDs from the context above when calling tools — do NOT ask the user for IDs.''',
+    );
 
     return buffer.toString();
   }
+
+  static String _currencySymbol(String code) => switch (code.toUpperCase()) {
+    'INR' => '₹',
+    'USD' => '\$',
+    'EUR' => '€',
+    'GBP' => '£',
+    'JPY' => '¥',
+    'CNY' => '¥',
+    'KRW' => '₩',
+    'RUB' => '₽',
+    'TRY' => '₺',
+    'BRL' => 'R\$',
+    'AUD' || 'CAD' || 'NZD' || 'SGD' || 'HKD' => '\$',
+    'THB' => '฿',
+    'IDR' => 'Rp',
+    'MYR' => 'RM',
+    'PHP' => '₱',
+    'VND' => '₫',
+    'ZAR' => 'R',
+    'SEK' || 'NOK' || 'DKK' || 'ISK' => 'kr',
+    'CHF' => 'CHF',
+    'PLN' => 'zł',
+    'CZK' => 'Kč',
+    'HUF' => 'Ft',
+    'AED' => 'د.إ',
+    'SAR' => '﷼',
+    _ => code,
+  };
 }
 
 class _PendingToolCall {
