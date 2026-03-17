@@ -35,8 +35,8 @@ class AiService {
   final Dio _dio;
   final ToolRegistry _toolRegistry;
 
-  String _baseUrl = 'http://192.168.1.15:11434/v1';
-  String _model = 'qwen3:8b';
+  String _baseUrl = 'http://192.168.1.36:11434/v1';
+  String _model = 'llama3-groq-tool-use';
 
   AiService(this._toolRegistry)
     : _dio = Dio(
