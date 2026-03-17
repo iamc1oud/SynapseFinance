@@ -7,6 +7,7 @@ enum InteractiveCardType {
   transferConfirm,
   subscriptionConfirm,
   deleteConfirm,
+  categoryConfirm,
 }
 
 sealed class ChatMessage extends Equatable {

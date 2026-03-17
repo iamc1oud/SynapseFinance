@@ -37,6 +37,7 @@ class AiService {
 
   String _baseUrl = 'http://192.168.1.36:11434/v1';
   String _model = 'llama3-groq-tool-use';
+  String? _apiKey;
 
   AiService(this._toolRegistry)
     : _dio = Dio(
@@ -46,13 +47,19 @@ class AiService {
         ),
       );
 
-  void configure({required String baseUrl, String? model}) {
+  void configure({required String baseUrl, String? model, String? apiKey}) {
     _baseUrl = baseUrl;
     if (model != null) _model = model;
+    _apiKey = apiKey;
   }
 
   String get baseUrl => _baseUrl;
   String get model => _model;
+
+  Map<String, String> get _headers => {
+        'Content-Type': 'application/json',
+        if (_apiKey != null) 'Authorization': 'Bearer $_apiKey',
+      };
 
   /// Stream response from Ollama via SSE.
   Stream<AiResponseChunk> sendMessage({
@@ -74,7 +81,7 @@ class AiService {
       data: jsonEncode(body),
       options: Options(
         responseType: ResponseType.stream,
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
       ),
     );
 
@@ -99,7 +106,7 @@ class AiService {
     final response = await _dio.post<Map<String, dynamic>>(
       '$_baseUrl/chat/completions',
       data: jsonEncode(body),
-      options: Options(headers: {'Content-Type': 'application/json'}),
+      options: Options(headers: _headers),
     );
     return response.data!;
   }

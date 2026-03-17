@@ -125,6 +125,26 @@ class TransactionConfirmCard extends StatelessWidget {
                 colors: c,
               ),
 
+            // Category creation fields
+            if (data['name'] != null && card.cardType == InteractiveCardType.categoryConfirm)
+              _DetailRow(
+                label: 'Name',
+                value: data['name'] as String,
+                colors: c,
+              ),
+            if (data['icon'] != null && card.cardType == InteractiveCardType.categoryConfirm)
+              _DetailRow(
+                label: 'Icon',
+                value: data['icon'] as String,
+                colors: c,
+              ),
+            if (data['category_type'] != null && card.cardType == InteractiveCardType.categoryConfirm)
+              _DetailRow(
+                label: 'Type',
+                value: (data['category_type'] as String).toUpperCase(),
+                colors: c,
+              ),
+
             const SizedBox(height: 12),
 
             // Action buttons
@@ -198,6 +218,7 @@ class TransactionConfirmCard extends StatelessWidget {
         InteractiveCardType.transferConfirm => Icons.swap_horiz,
         InteractiveCardType.deleteConfirm => Icons.delete_outline,
         InteractiveCardType.subscriptionConfirm => Icons.autorenew,
+        InteractiveCardType.categoryConfirm => Icons.category_outlined,
       };
 
   Color _getIconColor(AppColorScheme c) => switch (card.cardType) {
@@ -206,6 +227,7 @@ class TransactionConfirmCard extends StatelessWidget {
         InteractiveCardType.transferConfirm => c.primary,
         InteractiveCardType.deleteConfirm => c.error,
         InteractiveCardType.subscriptionConfirm => c.primary,
+        InteractiveCardType.categoryConfirm => c.primary,
       };
 
   String _getTitle() => switch (card.toolName) {
@@ -213,6 +235,7 @@ class TransactionConfirmCard extends StatelessWidget {
         'create_income' => 'New Income',
         'create_transfer' => 'New Transfer',
         'delete_transaction' => 'Delete Transaction',
+        'create_category' => 'New Category',
         _ => 'Confirm Action',
       };
 }

@@ -12,13 +12,13 @@ class ToolDefinition {
   });
 
   Map<String, dynamic> toOpenAISchema() => {
-        'type': 'function',
-        'function': {
-          'name': name,
-          'description': description,
-          'parameters': inputSchema,
-        },
-      };
+    'type': 'function',
+    'function': {
+      'name': name,
+      'description': description,
+      'parameters': inputSchema,
+    },
+  };
 }
 
 class ToolRegistry {

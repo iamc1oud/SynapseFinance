@@ -30,7 +30,9 @@ class ChatCubit extends Cubit<ChatState> {
   bool _contextLoaded = false;
 
   ChatCubit(this._aiService, this._toolRegistry, this._toolExecutor)
-    : super(const ChatState());
+    : super(const ChatState()) {
+    // NOTE: We can call aiService.configure to use any LLM Provider.
+  }
 
   // ─── Public API ────────────────────────────────────────────────────────────
 
@@ -77,18 +79,33 @@ class ChatCubit extends Cubit<ChatState> {
     if (card.status != CardStatus.pending) return;
 
     try {
-      await _toolExecutor.execute(card.toolName, card.data);
+      final result = await _toolExecutor.execute(card.toolName, card.data);
       final updated = card.copyWith(status: CardStatus.confirmed);
       final msgs = List<ChatMessage>.from(state.messages);
       msgs[idx] = updated;
+
+      String successText;
+      if (card.toolName == 'create_category') {
+        final cat = result['category'] as Map<String, dynamic>?;
+        successText =
+            'Category "${cat?['name'] ?? card.data['name']}" created successfully!';
+        // Refresh cached categories context
+        _contextLoaded = false;
+      } else {
+        successText = 'Done! Transaction recorded successfully.';
+      }
+
       msgs.add(
         AiTextMessage(
           id: _uuid.v4(),
           timestamp: DateTime.now(),
-          text: 'Done! Transaction recorded successfully.',
+          text: successText,
           suggestions: null,
         ),
       );
+      // Record confirmation in history so LLM knows it succeeded
+      _messageHistory.add({'role': 'assistant', 'content': successText});
+
       emit(state.copyWith(messages: msgs));
     } catch (e) {
       emit(state.copyWith(error: 'Failed: ${e.toString()}'));
@@ -103,6 +120,13 @@ class ChatCubit extends Cubit<ChatState> {
     final msgs = List<ChatMessage>.from(state.messages);
     msgs[idx] = updated;
     emit(state.copyWith(messages: msgs));
+
+    // Record that user ignored the action
+    _messageHistory.add({
+      'role': 'assistant',
+      'content':
+          'The user ignored/cancelled the ${card.toolName} action. Do not retry unless asked.',
+    });
   }
 
   void clearError() => emit(state.copyWith(error: null));
@@ -141,7 +165,32 @@ class ChatCubit extends Cubit<ChatState> {
           :final arguments,
         ):
           if (_toolRegistry.isMutation(toolName)) {
-            // Show interactive card — don't execute
+            // Record the assistant's tool call in history
+            _messageHistory.add({
+              'role': 'assistant',
+              'tool_calls': [
+                {
+                  'id': toolCallId,
+                  'type': 'function',
+                  'function': {
+                    'name': toolName,
+                    'arguments': jsonEncode(arguments),
+                  },
+                },
+              ],
+            });
+            // Record a tool result indicating user confirmation is needed
+            _messageHistory.add({
+              'role': 'tool',
+              'tool_call_id': toolCallId,
+              'content': jsonEncode({
+                'status': 'pending_user_confirmation',
+                'message':
+                    'Action presented to user for confirmation. Do not repeat this tool call.',
+              }),
+            });
+
+            // Show interactive card — don't execute yet
             final cardType = _getCardType(toolName);
             _addMessage(
               InteractiveCardMessage(
@@ -241,6 +290,7 @@ class ChatCubit extends Cubit<ChatState> {
     'create_income' => InteractiveCardType.transactionConfirm,
     'create_transfer' => InteractiveCardType.transferConfirm,
     'delete_transaction' => InteractiveCardType.deleteConfirm,
+    'create_category' => InteractiveCardType.categoryConfirm,
     _ => InteractiveCardType.transactionConfirm,
   };
 

@@ -29,6 +29,7 @@ class ToolExecutor {
       'create_expense' => _createExpense(args),
       'create_income' => _createIncome(args),
       'create_transfer' => _createTransfer(args),
+      'create_category' => _createCategory(args),
       'delete_transaction' => _deleteTransaction(args),
       _ => throw Exception('Unknown tool: $toolName'),
     };
@@ -212,6 +213,25 @@ class ToolExecutor {
           [],
     );
     return {'success': true, 'message': 'Transfer completed successfully'};
+  }
+
+  Future<Map<String, dynamic>> _createCategory(
+    Map<String, dynamic> args,
+  ) async {
+    final category = await _ledgerApi.createCategory(
+      name: args['name'] as String,
+      icon: args['icon'] as String,
+      categoryType: args['category_type'] as String,
+    );
+    return {
+      'success': true,
+      'category': {
+        'id': category.id,
+        'name': category.name,
+        'category_type': category.categoryType,
+        'icon': category.icon,
+      },
+    };
   }
 
   Future<Map<String, dynamic>> _deleteTransaction(

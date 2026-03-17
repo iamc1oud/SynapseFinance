@@ -172,6 +172,31 @@ final mutationTools = [
     },
   ),
   ToolDefinition(
+    name: 'create_category',
+    description:
+        'Create a new category when no existing category matches the user\'s transaction. Ask the user to confirm the name and type before calling.',
+    isMutation: true,
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'name': {
+          'type': 'string',
+          'description': 'Category name (e.g. "Groceries", "Freelance")',
+        },
+        'icon': {
+          'type': 'string',
+          'description': 'Emoji icon for the category (e.g. "🛒", "💼")',
+        },
+        'category_type': {
+          'type': 'string',
+          'enum': ['expense', 'income'],
+          'description': 'Whether this is an expense or income category',
+        },
+      },
+      'required': ['name', 'icon', 'category_type'],
+    },
+  ),
+  ToolDefinition(
     name: 'delete_transaction',
     description:
         'Delete a transaction by ID and reverse its balance effect.',
