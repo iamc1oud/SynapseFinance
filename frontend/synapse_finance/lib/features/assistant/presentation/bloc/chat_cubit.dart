@@ -332,7 +332,8 @@ RULES:
 5. If the user asks about something outside personal finance, politely redirect.
 6. Keep responses concise and helpful.
 7. When multiple accounts exist, clarify which one to use by showing account names.
-8. Use the account/category IDs from the context above when calling tools — do NOT ask the user for IDs.''',
+8. Use the account/category IDs from the context above when calling tools — do NOT ask the user for IDs.
+9. You can call MULTIPLE tools in a single response. When a query needs data from different filters (e.g. expenses AND income), call the tool once for each filter in the SAME response using parallel tool calls. Do NOT call a tool once and try to answer with incomplete data.''',
     );
 
     return buffer.toString();
