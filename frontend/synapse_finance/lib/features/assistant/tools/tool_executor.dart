@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
@@ -59,6 +60,8 @@ class ToolExecutor {
       dateFrom: _parseDate(args['date_from']),
       dateTo: _parseDate(args['date_to']),
     );
+
+    debugPrint('${txns}');
     return {
       'transactions': txns
           .map(
