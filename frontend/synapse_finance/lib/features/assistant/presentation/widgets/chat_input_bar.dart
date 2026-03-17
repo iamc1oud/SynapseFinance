@@ -28,6 +28,7 @@ class ChatInputBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.appColors;
     return SafeArea(
+      top: false,
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
         decoration: BoxDecoration(
