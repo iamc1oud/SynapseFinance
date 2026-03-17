@@ -6,3 +6,6 @@ debug:
 
 port-forward:
 	ngrok http 8000 --url https://goldfish-able-viper.ngrok-free.app
+
+serve-llm:
+	OLLAMA_HOST=0.0.0.0 ollama serve

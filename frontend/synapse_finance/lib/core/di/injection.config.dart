@@ -16,6 +16,11 @@ import 'package:injectable/injectable.dart' as _i526;
 import 'package:logger/logger.dart' as _i974;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
+import '../../features/assistant/data/datasources/ai_service.dart' as _i96;
+import '../../features/assistant/di/assistant_module.dart' as _i898;
+import '../../features/assistant/presentation/bloc/chat_cubit.dart' as _i1024;
+import '../../features/assistant/tools/tool_executor.dart' as _i853;
+import '../../features/assistant/tools/tool_registry.dart' as _i30;
 import '../../features/auth/data/datasources/auth_api_client.dart' as _i552;
 import '../../features/auth/data/datasources/auth_local_datasource.dart'
     as _i992;
@@ -121,15 +126,20 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final dioModule = _$DioModule();
     final secureStorageModule = _$SecureStorageModule();
+    final assistantModule = _$AssistantModule();
     final sharedPreferencesModule = _$SharedPreferencesModule();
     gh.lazySingleton<_i702.AuthEventBus>(() => _i702.AuthEventBus());
     gh.lazySingleton<_i974.Logger>(() => dioModule.logger);
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => secureStorageModule.secureStorage,
     );
+    gh.lazySingleton<_i30.ToolRegistry>(() => assistantModule.toolRegistry);
     await gh.lazySingletonAsync<_i460.SharedPreferences>(
       () => sharedPreferencesModule.sharedPreferences,
       preResolve: true,
+    );
+    gh.lazySingleton<_i96.AiService>(
+      () => _i96.AiService(gh<_i30.ToolRegistry>()),
     );
     gh.lazySingleton<_i964.TokenStorage>(
       () => _i964.TokenStorage(gh<_i558.FlutterSecureStorage>()),
@@ -179,6 +189,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i11.LedgerRepository>(
       () => _i321.LedgerRepositoryImpl(gh<_i881.LedgerApiClient>()),
+    );
+    gh.lazySingleton<_i853.ToolExecutor>(
+      () => _i853.ToolExecutor(
+        gh<_i881.LedgerApiClient>(),
+        gh<_i22.SubscriptionApiClient>(),
+        gh<_i1055.CurrencyApiClient>(),
+      ),
     );
     gh.lazySingleton<_i44.CurrencyRepository>(
       () => _i575.CurrencyRepositoryImpl(gh<_i1055.CurrencyApiClient>()),
@@ -299,6 +316,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i44.CurrencyRepository>(),
       ),
     );
+    gh.factory<_i1024.ChatCubit>(
+      () => _i1024.ChatCubit(
+        gh<_i96.AiService>(),
+        gh<_i30.ToolRegistry>(),
+        gh<_i853.ToolExecutor>(),
+      ),
+    );
     gh.factory<_i99.AddTransactionCubit>(
       () => _i99.AddTransactionCubit(
         gh<_i326.GetAccountsUseCase>(),
@@ -345,5 +369,7 @@ extension GetItInjectableX on _i174.GetIt {
 class _$DioModule extends _i667.DioModule {}
 
 class _$SecureStorageModule extends _i964.SecureStorageModule {}
+
+class _$AssistantModule extends _i898.AssistantModule {}
 
 class _$SharedPreferencesModule extends _i992.SharedPreferencesModule {}
