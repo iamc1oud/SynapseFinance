@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../assistant/presentation/bloc/chat_cubit.dart';
+import '../../../assistant/presentation/pages/chat_page.dart';
 import '../../../ledger/presentation/bloc/transaction_list_cubit.dart';
 import '../../../ledger/presentation/pages/transaction_list_page.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
@@ -25,7 +27,10 @@ class _HomePageState extends State<HomePage> {
       getIt<SubscriptionListCubit>();
 
   late final _tabs = [
-    const _AssistantTab(),
+    BlocProvider(
+      create: (_) => getIt<ChatCubit>(),
+      child: const ChatPage(),
+    ),
     BlocProvider(
       create: (_) => getIt<TransactionListCubit>(),
       child: const TransactionListPage(),
@@ -50,7 +55,7 @@ class _HomePageState extends State<HomePage> {
       extendBody: true,
       backgroundColor: c.background,
       body: IndexedStack(index: _currentIndex, children: _tabs),
-      floatingActionButton: _currentIndex != 3
+      floatingActionButton: _currentIndex != 3 && _currentIndex != 0
           ? FloatingActionButton(
               onPressed: () async {
                 if (_currentIndex == 2) {
@@ -190,38 +195,4 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-// ─── Tab content ───────────────────────────────────────────────────────────────
-
-class _AssistantTab extends StatelessWidget {
-  const _AssistantTab();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.appColors;
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.auto_awesome, size: 56, color: c.primary),
-            const SizedBox(height: 16),
-            Text(
-              'AI Assistant',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: c.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Chat to log expenses or get insights',
-              style: TextStyle(color: c.textSecondary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
