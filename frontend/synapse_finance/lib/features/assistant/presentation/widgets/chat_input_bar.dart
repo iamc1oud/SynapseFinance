@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'orb_loader.dart';
 
 class ChatInputBar extends StatelessWidget {
   final TextEditingController controller;
@@ -63,22 +64,29 @@ class ChatInputBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: isLoading
-                    ? c.surfaceLight
-                    : c.primary.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: Icon(
-                  isLoading ? Icons.hourglass_empty : Icons.arrow_upward,
-                  color: isLoading ? c.textHint : c.primary,
-                  size: 20,
+            if (isLoading)
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: OrbLoader(size: 28, color: c.primary),
                 ),
-                onPressed: isLoading ? null : _submit,
+              )
+            else
+              Container(
+                decoration: BoxDecoration(
+                  color: c.primary.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_upward,
+                    color: c.primary,
+                    size: 20,
+                  ),
+                  onPressed: _submit,
+                ),
               ),
-            ),
           ],
         ),
       ),
