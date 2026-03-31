@@ -36,7 +36,7 @@ class AiService {
   final ToolRegistry _toolRegistry;
 
   String _baseUrl = 'http://192.168.1.27:11434/v1';
-  String _model = 'gemma3:4b';
+  String _model = 'qwen3.5:0.8b';
   String? _apiKey;
 
   AiService(this._toolRegistry)
