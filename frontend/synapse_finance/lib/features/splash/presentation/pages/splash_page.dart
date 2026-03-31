@@ -1,8 +1,41 @@
+import 'dart:io';
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:home_widget/home_widget.dart';
+import 'package:synapse_finance/core/constants/constants.dart';
+import 'package:synapse_finance/core/di/injection.dart';
+import 'package:synapse_finance/core/services/home_widget_service.dart';
+import 'package:synapse_finance/core/services/widget_test_service.dart';
 
 import '../../../../core/theme/app_colors.dart';
+
+/// Called when Doing Background Work initiated from Widget
+@pragma("vm:entry-point")
+Future<void> interactiveCallback(Uri? data) async {
+  if (data?.host == 'refresh') {
+    // Refresh net worth data when widget is tapped
+    try {
+      await configureDependencies();
+      final homeWidgetService = getIt<HomeWidgetService>();
+      await homeWidgetService.updateNetWorthWidget();
+    } catch (e) {
+      // Fallback behavior
+      await HomeWidget.setAppGroupId(appGroupId);
+      await HomeWidget.saveWidgetData<String>('net_worth_formatted', 'Tap to refresh');
+      await HomeWidget.updateWidget(
+        name: 'SynapseFinanceWidget',
+        iOSName: 'SynapseFinanceWidget',
+      );
+      if (Platform.isAndroid) {
+        await HomeWidget.updateWidget(
+          qualifiedAndroidName: 'com.example.synapse_finance.SynapseFinanceWidgetReceiver',
+        );
+      }
+    }
+  }
+}
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -49,16 +82,15 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 600),
     );
 
-    _textFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _textController, curve: Curves.easeOut),
-    );
+    _textFade = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeOut));
 
     _textSlide = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _textController, curve: Curves.easeOut),
-    );
+    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeOut));
 
     // Pulse glow on the icon
     _pulseController = AnimationController(
@@ -85,6 +117,28 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     await Future.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
     _pulseController.repeat(reverse: true);
+    
+    // Initialize home widget after animations start
+    initializeHomeWidget();
+  }
+
+  void initializeHomeWidget() async {
+    final homeWidgetService = getIt<HomeWidgetService>();
+    await homeWidgetService.initialize();
+    HomeWidget.registerInteractivityCallback(interactiveCallback);
+    
+    // Test basic widget functionality first
+    try {
+      final testService = getIt<WidgetTestService>();
+      await testService.testBasicWidget();
+      print('✅ Widget test passed, proceeding with net worth update');
+      
+      // Initial net worth update
+      await homeWidgetService.updateNetWorthWidget();
+    } catch (e) {
+      print('❌ Widget initialization failed: $e');
+      // Continue anyway, the app should still work without widgets
+    }
   }
 
   @override
@@ -112,10 +166,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   opacity: _iconFade,
                   child: ScaleTransition(
                     scale: _iconScale,
-                    child: ScaleTransition(
-                      scale: _pulseScale,
-                      child: child,
-                    ),
+                    child: ScaleTransition(scale: _pulseScale, child: child),
                   ),
                 );
               },
@@ -200,10 +251,7 @@ class _SplashIcon extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  primary,
-                  primary.withValues(alpha: 0.7),
-                ],
+                colors: [primary, primary.withValues(alpha: 0.7)],
               ),
               boxShadow: [
                 BoxShadow(

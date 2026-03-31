@@ -61,6 +61,8 @@ import '../../features/ledger/domain/usecases/get_categories_usecase.dart'
     as _i549;
 import '../../features/ledger/domain/usecases/get_category_spending_usecase.dart'
     as _i817;
+import '../../features/ledger/domain/usecases/get_net_worth_usecase.dart'
+    as _i42;
 import '../../features/ledger/domain/usecases/get_tags_usecase.dart' as _i501;
 import '../../features/ledger/domain/usecases/get_transactions_by_category_usecase.dart'
     as _i417;
@@ -115,6 +117,9 @@ import '../network/auth_interceptor.dart' as _i908;
 import '../network/dio_client.dart' as _i667;
 import '../network/logging_interceptor.dart' as _i551;
 import '../network/token_storage.dart' as _i964;
+import '../services/deep_link_service.dart' as _i391;
+import '../services/home_widget_service.dart' as _i299;
+import '../services/widget_test_service.dart' as _i651;
 import '../theme/theme_cubit.dart' as _i611;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -133,6 +138,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => secureStorageModule.secureStorage,
     );
+    gh.lazySingleton<_i651.WidgetTestService>(() => _i651.WidgetTestService());
     gh.lazySingleton<_i30.ToolRegistry>(() => assistantModule.toolRegistry);
     await gh.lazySingletonAsync<_i460.SharedPreferences>(
       () => sharedPreferencesModule.sharedPreferences,
@@ -236,6 +242,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i817.GetCategorySpendingUseCase>(
       () => _i817.GetCategorySpendingUseCase(gh<_i11.LedgerRepository>()),
     );
+    gh.lazySingleton<_i42.GetNetWorthUseCase>(
+      () => _i42.GetNetWorthUseCase(gh<_i11.LedgerRepository>()),
+    );
     gh.lazySingleton<_i501.GetTagsUseCase>(
       () => _i501.GetTagsUseCase(gh<_i11.LedgerRepository>()),
     );
@@ -293,6 +302,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i292.RestoreAccountUseCase>(),
         gh<_i426.UpdateAccountUseCase>(),
       ),
+    );
+    gh.lazySingleton<_i299.HomeWidgetService>(
+      () => _i299.HomeWidgetService(gh<_i42.GetNetWorthUseCase>()),
     );
     gh.lazySingleton<_i52.AuthCubit>(
       () => _i52.AuthCubit(
@@ -358,6 +370,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i990.ToggleSubscriptionUseCase>(),
         gh<_i170.DeleteSubscriptionUseCase>(),
       ),
+    );
+    gh.lazySingleton<_i391.DeepLinkService>(
+      () => _i391.DeepLinkService(gh<_i299.HomeWidgetService>()),
     );
     gh.factory<_i281.LoginCubit>(
       () => _i281.LoginCubit(gh<_i188.LoginUseCase>(), gh<_i52.AuthCubit>()),
