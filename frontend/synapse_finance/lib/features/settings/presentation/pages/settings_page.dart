@@ -7,6 +7,7 @@ import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import 'account_settings_page.dart';
+import 'ai_chat_personalization_page.dart';
 import 'category_settings_page.dart';
 import 'personal_information_page.dart';
 
@@ -243,6 +244,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     iconBg: const Color(0xFF1E6FDB),
                     icon: Icons.tune_rounded,
                     label: 'AI Chat Personalization',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AiChatPersonalizationPage(),
+                      ),
+                    ),
                     isLast: true,
                   ),
                 ],

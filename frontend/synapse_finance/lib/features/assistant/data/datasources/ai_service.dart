@@ -35,8 +35,8 @@ class AiService {
   final Dio _dio;
   final ToolRegistry _toolRegistry;
 
-  String _baseUrl = 'http://192.168.1.15:11434/v1';
-  String _model = 'llama3.1:8b';
+  String _baseUrl = 'http://192.168.1.27:11434/v1';
+  String _model = 'gemma3:4b';
   String? _apiKey;
 
   AiService(this._toolRegistry)

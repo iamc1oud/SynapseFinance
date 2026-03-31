@@ -86,12 +86,22 @@ import '../../features/ledger/presentation/bloc/transaction_list_cubit.dart'
     as _i660;
 import '../../features/settings/data/datasources/currency_api_client.dart'
     as _i1055;
+import '../../features/settings/data/repositories/ai_settings_repository_impl.dart'
+    as _i206;
 import '../../features/settings/data/repositories/currency_repository_impl.dart'
     as _i575;
+import '../../features/settings/domain/repositories/ai_settings_repository.dart'
+    as _i326;
 import '../../features/settings/domain/repositories/currency_repository.dart'
     as _i44;
+import '../../features/settings/domain/usecases/get_ai_settings_usecase.dart'
+    as _i770;
 import '../../features/settings/domain/usecases/get_user_currencies_usecase.dart'
     as _i165;
+import '../../features/settings/domain/usecases/save_ai_settings_usecase.dart'
+    as _i37;
+import '../../features/settings/presentation/bloc/ai_settings_cubit.dart'
+    as _i928;
 import '../../features/settings/presentation/bloc/currency_management_cubit.dart'
     as _i797;
 import '../../features/subscriptions/data/datasources/subscription_api_client.dart'
@@ -156,6 +166,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i551.LoggingInterceptor>(
       () => _i551.LoggingInterceptor(gh<_i974.Logger>()),
     );
+    gh.lazySingleton<_i326.AiSettingsRepository>(
+      () => _i206.AiSettingsRepositoryImpl(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i770.GetAiSettingsUseCase>(
+      () => _i770.GetAiSettingsUseCase(gh<_i326.AiSettingsRepository>()),
+    );
+    gh.lazySingleton<_i37.SaveAiSettingsUseCase>(
+      () => _i37.SaveAiSettingsUseCase(gh<_i326.AiSettingsRepository>()),
+    );
     gh.lazySingleton<_i992.AuthLocalDataSource>(
       () => _i992.AuthLocalDataSourceImpl(
         gh<_i460.SharedPreferences>(),
@@ -166,6 +185,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i908.AuthInterceptor(
         gh<_i964.TokenStorage>(),
         gh<_i702.AuthEventBus>(),
+      ),
+    );
+    gh.factory<_i928.AiSettingsCubit>(
+      () => _i928.AiSettingsCubit(
+        gh<_i770.GetAiSettingsUseCase>(),
+        gh<_i37.SaveAiSettingsUseCase>(),
       ),
     );
     gh.lazySingleton<_i361.Dio>(
